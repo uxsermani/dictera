@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Creator+ Component System — Course Experience Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   TOKENS — paste these names into a Figma variable collection.
+   Brand: D2L Brightspace orange + navy. Orange is brand only,
+   never a status. No uppercase transforms anywhere — emphasis
+   comes from weight and colour.
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  --brand:#EF6C24;
+  --brand-deep:#B8480F;
+  --brand-tint:#FDF0E7;
+  --brand-tint-2:#FAD9C4;
+  --navy:#0B1B2B;
+  --navy-2:#122A3E;
+
+  --bg:#F5F7F9;
+  --surface:#FFFFFF;
+  --sunk:#EFF3F6;
+  --ink:#0B1B2B;
+  --ink-2:#4C5F70;
+  --ink-3:#7E92A3;
+  --line:rgba(11,27,43,.09);
+  --line-2:rgba(11,27,43,.16);
+
+  --st-open:#0E7A55;
+  --st-fixed:#1B6FC4;
+  --st-lock:#5D6D7C;
+  --st-limit:#C0304A;
+
+  --f-head:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  --t-micro:.875rem; --t-body:1rem; --t-lead:1.1875rem;
+  --t-h3:1.5rem; --t-h2:2.25rem; --t-display:clamp(2.5rem,6vw,4.75rem);
+
+  --s1:.25rem; --s2:.5rem; --s3:.75rem; --s4:1rem;
+  --s5:1.5rem; --s6:2rem; --s7:3rem; --s8:4.5rem; --s9:6.5rem;
+
+  --r-sm:8px; --r:14px; --r-lg:20px; --r-xl:26px; --r-pill:999px;
+  --e1:0 1px 2px rgba(11,27,43,.05), 0 2px 8px rgba(11,27,43,.05);
+  --e2:0 2px 6px rgba(11,27,43,.06), 0 14px 34px rgba(11,27,43,.09);
+  --page:min(1280px,100% - 3rem);
+}
+
+.dark{
+  --bg:var(--navy); --surface:var(--navy-2); --sunk:#0E2334;
+  --ink:#EEF4F8; --ink-2:#A9BECE; --ink-3:#7E96A9;
+  --line:rgba(255,255,255,.11); --line-2:rgba(255,255,255,.2);
+  --e1:0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.22);
+  --e2:0 4px 12px rgba(0,0,0,.34), 0 18px 44px rgba(0,0,0,.3);
+  background:var(--bg); color:var(--ink);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--f-body);font-size:var(--t-body);line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0;font-family:var(--f-head);line-height:1.15}
+p{margin:0 0 var(--s4)}p:last-child{margin-bottom:0}
+a{color:var(--brand)}
+:focus-visible{outline:2.5px solid var(--brand);outline-offset:3px;border-radius:4px}
+.wrap{width:var(--page);margin-inline:auto}
+.band{padding-block:var(--s9)}
+
+/* ═════ status chip — sentence case, weight carries emphasis ═════ */
+.chip{
+  display:inline-block;font-family:var(--f-body);font-size:.8125rem;
+  font-weight:600;padding:.3em .7em;border-radius:var(--r-pill);
+  color:#fff;white-space:nowrap;line-height:1.4;letter-spacing:0;
+}
+.chip.open{background:var(--st-open)}
+.chip.fixed{background:var(--st-fixed)}
+.chip.lock{background:var(--st-lock)}
+.chip.limit{background:var(--st-limit)}
+
+/* ═════ eyebrow — colour + weight, no caps ═════ */
+.eyebrow{
+  display:inline-flex;align-items:center;gap:var(--s3);
+  font-size:var(--t-micro);font-weight:700;color:var(--brand);letter-spacing:0;
+}
+.eyebrow::before{content:"";width:1.75rem;height:3px;background:var(--brand);border-radius:2px;flex:none}
+
+/* ═════ topbar ═════ */
+.topbar{position:sticky;top:0;z-index:60;background:rgba(11,27,43,.94);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.1)}
+.topbar-in{display:flex;align-items:center;justify-content:space-between;gap:var(--s5);min-height:3.5rem}
+.logo{display:flex;align-items:center;gap:var(--s3);color:#EEF4F8;font-family:var(--f-head);font-weight:800;font-size:var(--t-micro)}
+.logo i{width:1.65rem;height:1.65rem;border-radius:8px;background:var(--brand);display:grid;place-items:center;font-family:var(--f-head);font-size:.75rem;font-weight:800;color:#fff;font-style:normal;flex:none}
+.topnav{display:flex;gap:var(--s1);list-style:none;margin:0;padding:0}
+.topnav a{display:block;padding:.42em .8em;border-radius:var(--r-pill);font-size:var(--t-micro);color:#A9BECE;text-decoration:none;transition:background .18s,color .18s}
+.topnav a:hover{background:rgba(255,255,255,.09);color:#fff}
+
+/* ═════ hero ═════ */
+.hero{padding-block:var(--s9) var(--s8);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:auto -12% -55% auto;width:46rem;height:46rem;background:radial-gradient(circle,rgba(239,108,36,.2),transparent 62%);pointer-events:none}
+.hero-in{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:var(--s8);align-items:center}
+.hero h1{font-size:var(--t-display);font-weight:900;letter-spacing:-.035em;margin:var(--s5) 0}
+.hero h1 span{color:var(--brand)}
+.hero-lede{font-size:var(--t-lead);line-height:1.55;color:var(--ink-2);max-width:46ch;margin-bottom:var(--s4)}
+.hero-lede b{color:#fff;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s3);margin-top:var(--s6);max-width:36rem}
+.stats div{background:var(--surface);border-radius:var(--r);padding:var(--s4);box-shadow:var(--e1)}
+.stats b{display:block;font-family:var(--f-head);font-size:2rem;font-weight:800;line-height:1;letter-spacing:-.03em;margin-bottom:var(--s2)}
+.stats span{font-size:.8125rem;color:var(--ink-3);line-height:1.35;display:block}
+.stats div:last-child b{color:var(--brand)}
+
+.keycard{background:var(--surface);border-radius:var(--r-xl);padding:var(--s6);box-shadow:var(--e2);border:1px solid var(--line)}
+.keycard h2{font-size:var(--t-lead);font-weight:800;margin-bottom:var(--s2)}
+.keycard > p{font-size:var(--t-micro);color:var(--ink-2);margin-bottom:var(--s5)}
+.keylist{list-style:none;margin:0;padding:0;display:grid;gap:var(--s4)}
+.keylist li{display:grid;grid-template-columns:7rem 1fr;gap:var(--s4);align-items:start}
+.keylist b{display:block;font-size:var(--t-micro);font-weight:700;margin-bottom:1px}
+.keylist p{font-size:var(--t-micro);color:var(--ink-2);margin:0;line-height:1.5}
+
+/* ═════ section head ═════ */
+.shead{display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--s6);align-items:start;margin-bottom:var(--s7)}
+.snum{font-family:var(--f-head);font-size:clamp(3.5rem,7vw,5.5rem);font-weight:900;line-height:.82;letter-spacing:-.05em;color:transparent;-webkit-text-stroke:2px var(--line-2)}
+.shead h2{font-size:var(--t-h2);font-weight:800;letter-spacing:-.03em;margin:var(--s4) 0}
+.shead p{color:var(--ink-2);max-width:62ch;margin:0}
+.shead p + p{margin-top:var(--s3)}
+.shead code{font-family:var(--f-mono);font-size:.85em;background:var(--sunk);padding:.14em .4em;border-radius:5px}
+
+/* ═════ notes ═════ */
+.note{border-radius:var(--r);padding:var(--s5) var(--s5) var(--s5) var(--s6);margin-top:var(--s5);position:relative;overflow:hidden;background:var(--surface);box-shadow:var(--e1)}
+.note::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--st-lock)}
+.note h4{font-size:var(--t-body);font-weight:800;margin-bottom:var(--s3)}
+.note p,.note li{font-size:var(--t-micro);color:var(--ink-2)}
+.note ul{margin:0;padding-left:1.15em;display:grid;gap:var(--s2)}
+.note b{color:var(--ink);font-weight:600}
+.note code{font-family:var(--f-mono);font-size:.82em;background:var(--sunk);padding:.14em .42em;border-radius:5px;color:var(--ink)}
+.note.limit::before{background:var(--st-limit)}.note.limit h4{color:var(--st-limit)}
+.note.fixed::before{background:var(--st-fixed)}.note.fixed h4{color:var(--st-fixed)}
+.note.brand::before{background:var(--brand)}.note.brand h4{color:var(--brand-deep)}
+
+/* ═════ 01 knobs ═════ */
+.knobs{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:var(--s4)}
+.knob{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--e1);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s3);border:1px solid var(--line)}
+.sw{min-height:4.5rem;border-radius:var(--r);box-shadow:inset 0 0 0 1px rgba(11,27,43,.12)}
+.knob h3{font-size:var(--t-lead);font-weight:800;letter-spacing:-.015em}
+.knob p{font-size:var(--t-micro);color:var(--ink-2);margin:0}
+.knob .applies{font-size:.8125rem;color:var(--ink-3);margin-top:auto;padding-top:var(--s3);border-top:1px solid var(--line)}
+.knob .applies b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px}
+
+/* ═════ 02 layouts ═════ */
+.layouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:var(--s4)}
+.lay{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--e1);padding:var(--s5);border:1px solid var(--line)}
+.pnl{display:flex;gap:var(--s2);min-height:5.5rem;margin-bottom:var(--s4)}
+.pnl div{background:var(--sunk);border-radius:var(--r-sm);display:grid;place-items:center;font-family:var(--f-mono);font-size:.75rem;color:var(--ink-3);border:1px solid var(--line)}
+.lay h3{font-size:var(--t-body);font-weight:700;margin-bottom:2px}
+.lay span{font-size:var(--t-micro);color:var(--ink-3)}
+
+/* ═════ four-axis explainer ═════ */
+.axes-block{margin-bottom:var(--s7)}
+.axes-intro{max-width:64ch;margin-bottom:var(--s5)}
+.axes-intro h3{font-size:var(--t-lead);font-weight:800;margin-bottom:var(--s3);letter-spacing:-.015em}
+.axes-intro p{font-size:var(--t-micro);color:var(--ink-2);margin:0}
+.axes{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:var(--s4)}
+.axis{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:var(--s5);box-shadow:var(--e1);display:flex;flex-direction:column;gap:var(--s3);
+}
+.axis-q{font-size:.8125rem;color:var(--brand-deep);font-weight:600;margin:0}
+.axis h4{font-size:var(--t-lead);font-weight:800;letter-spacing:-.02em}
+.axis > p{font-size:var(--t-micro);color:var(--ink-2);margin:0;line-height:1.55}
+.axis-eg{font-size:.8125rem;color:var(--ink-2);padding-top:var(--s3);border-top:1px solid var(--line);line-height:1.5}
+.axis-eg b{display:block;color:var(--ink-3);font-weight:600;margin-bottom:2px}
+.axis-usual{margin-top:auto;padding-top:var(--s3);display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;font-size:.8125rem;color:var(--ink-3)}
+.axes-close{
+  margin-top:var(--s4);padding:var(--s5) var(--s5) var(--s5) var(--s6);
+  background:var(--brand-tint);border-radius:var(--r);position:relative;overflow:hidden;
+}
+.axes-close::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--brand)}
+.axes-close p{font-size:var(--t-micro);color:var(--ink-2);margin:0}
+.axes-close b{color:var(--brand-deep);font-weight:700}
+
+/* ═════ matrix ═════ */
+.matrix{border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--e2);margin-bottom:var(--s7);background:var(--bg)}
+.matrix-hd{padding:var(--s5) var(--s6);border-bottom:1px solid var(--line)}
+.matrix-hd h3{font-size:var(--t-lead);font-weight:800;margin-bottom:var(--s2)}
+.matrix-hd p{font-size:var(--t-micro);color:var(--ink-2);margin:0;max-width:72ch}
+.matrix-hd b{color:var(--brand)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:var(--t-micro)}
+.mtable{min-width:46rem}
+.mtable th,.mtable td{padding:var(--s3) var(--s5);text-align:left;border-bottom:1px solid var(--line)}
+.mtable thead th{font-size:.8125rem;font-weight:600;color:var(--ink-3);padding-block:var(--s4) var(--s3)}
+.mtable tbody th{font-family:var(--f-head);font-weight:700;font-size:var(--t-body);white-space:nowrap;color:var(--ink)}
+.mtable tbody tr:last-child th,.mtable tbody tr:last-child td{border-bottom:none}
+.mtable tbody tr:hover{background:rgba(255,255,255,.045)}
+.mtable td.spot{background:rgba(239,108,36,.15);box-shadow:inset 2px 0 0 var(--brand)}
+
+/* ═════ element cards ═════ */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(24rem,1fr));gap:var(--s5)}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
+  display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--e1);
+  transition:box-shadow .22s ease,transform .22s ease;
+}
+.card:hover{box-shadow:var(--e2);transform:translateY(-3px)}
+
+.card-hd{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:var(--s4);align-items:start;padding:var(--s5) var(--s5) var(--s4)}
+.badge{
+  width:2.25rem;height:2.25rem;border-radius:12px;flex:none;
+  background:var(--brand-tint);color:var(--brand-deep);
+  display:grid;place-items:center;
+  font-family:var(--f-head);font-weight:800;font-size:.9375rem;
+}
+.card-hd h3{font-size:var(--t-h3);font-weight:800;letter-spacing:-.025em;margin-bottom:var(--s2)}
+.card-hd p{font-size:var(--t-micro);color:var(--ink-2);margin:0;line-height:1.5}
+.who{font-size:.8125rem;color:var(--ink-3);white-space:nowrap;padding-top:.3rem}
+
+.pv{margin:0 var(--s5) var(--s5);background:var(--sunk);border-radius:var(--r-lg);border:1px solid var(--line);padding:var(--s5);min-height:10.5rem;display:grid;place-items:center}
+.pv svg{width:100%;height:auto;max-height:9.5rem;display:block}
+
+.gauge{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s3);padding:var(--s4) var(--s5);background:var(--sunk);border-block:1px solid var(--line);margin:0}
+.gauge div{min-width:0}
+.gauge dt{font-size:.75rem;color:var(--ink-3);margin-bottom:var(--s2);font-weight:500}
+.gauge dd{margin:0}
+.gauge .chip{font-size:.6875rem;padding:.32em .5em;display:block;text-align:center;font-weight:600}
+
+.card-body{padding:var(--s5);display:grid;gap:var(--s5)}
+.spec h4{font-size:.9375rem;font-weight:700;margin-bottom:var(--s3);display:flex;align-items:center;gap:var(--s2)}
+.spec h4::before{content:"";width:.5rem;height:.5rem;border-radius:50%;flex:none}
+.spec.o h4{color:var(--st-open)}.spec.o h4::before{background:var(--st-open)}
+.spec.l h4{color:var(--st-lock)}.spec.l h4::before{background:var(--st-lock)}
+.spec.x h4{color:var(--st-limit)}.spec.x h4::before{background:var(--st-limit)}
+.spec ul{margin:0;padding-left:1.15em;display:grid;gap:var(--s2);font-size:var(--t-micro);color:var(--ink-2)}
+.spec b{color:var(--ink);font-weight:600}
+.spec.x b{color:var(--st-limit)}
+.spec code{font-family:var(--f-mono);font-size:.82em;background:var(--sunk);padding:.14em .42em;border-radius:5px;color:var(--ink)}
+
+/* theme-touch row — the accuracy fix */
+.theme{display:grid;grid-template-columns:auto 1fr;gap:var(--s3);align-items:start;padding:var(--s4) var(--s5);background:var(--brand-tint);border-block:1px solid rgba(239,108,36,.22)}
+.theme.none{background:var(--sunk);border-block-color:var(--line)}
+.theme i{width:1rem;height:1rem;border-radius:5px;background:var(--brand);flex:none;margin-top:.2rem;font-style:normal}
+.theme.none i{background:var(--ink-3);opacity:.4}
+.theme b{display:block;font-size:.8125rem;font-weight:700;color:var(--brand-deep);margin-bottom:1px}
+.theme.none b{color:var(--ink-2)}
+.theme span{font-size:.8125rem;color:var(--ink-2);line-height:1.45}
+
+.card-ft{margin-top:auto;padding:var(--s5);display:grid;gap:var(--s3);font-size:var(--t-micro);color:var(--ink-2)}
+.card-ft b{display:block;font-size:.8125rem;color:var(--ink-3);font-weight:600;margin-bottom:1px}
+.vs{display:flex;flex-wrap:wrap;gap:var(--s2);padding-top:var(--s2)}
+.vs span{font-family:var(--f-mono);font-size:.6875rem;background:var(--sunk);border:1px solid var(--line);padding:.32em .55em;border-radius:6px;color:var(--ink-2)}
+
+/* ═════ practices table ═════ */
+.ptable{min-width:52rem}
+.ptable th,.ptable td{padding:var(--s4) var(--s5);text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+.ptable thead th{font-size:.8125rem;font-weight:600;color:var(--ink-3)}
+.ptable tbody th{font-family:var(--f-head);font-weight:700;font-size:var(--t-body);white-space:nowrap;color:var(--ink)}
+.ptable tbody td{color:var(--ink-2)}
+.ptable tbody tr:last-child th,.ptable tbody tr:last-child td{border-bottom:none}
+.ptable tbody tr:hover{background:rgba(255,255,255,.045)}
+.ptable code{font-family:var(--f-mono);font-size:.82em;background:var(--sunk);padding:.14em .42em;border-radius:5px;color:var(--ink)}
+
+/* ═════ handoff ═════ */
+.slabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(20rem,1fr));gap:var(--s5)}
+.slab{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);padding:var(--s6);box-shadow:var(--e1)}
+.slab h3{font-size:var(--t-lead);font-weight:800;margin-bottom:var(--s4);letter-spacing:-.015em}
+.slab ul{margin:0;padding-left:1.15em;display:grid;gap:var(--s3);font-size:var(--t-micro);color:var(--ink-2)}
+.slab b{color:var(--ink);font-weight:600}
+.tree{font-family:var(--f-mono);font-size:.75rem;line-height:1.9;background:var(--sunk);border:1px solid var(--line);border-radius:var(--r);padding:var(--s5);margin:0;overflow-x:auto;color:var(--ink-2)}
+.tree em{color:var(--brand-deep);font-style:normal;font-weight:600}
+
+/* ═════ footer ═════ */
+.foot{padding-block:var(--s8)}
+.foot-in{display:grid;grid-template-columns:repeat(auto-fit,minmax(20rem,1fr));gap:var(--s6)}
+.foot h3{font-size:var(--t-h3);font-weight:800;letter-spacing:-.025em;margin-bottom:var(--s3)}
+.foot p{font-size:var(--t-micro);color:var(--ink-2);max-width:58ch}
+.foot b{color:var(--ink)}
+
+/* ═════ responsive · motion · print ═════ */
+@media (max-width:62rem){
+  .hero-in{grid-template-columns:1fr;gap:var(--s6)}
+  .hero{padding-block:var(--s7)}
+  .band{padding-block:var(--s8)}
+  .shead{grid-template-columns:1fr;gap:var(--s2)}
+}
+@media (max-width:46rem){
+  :root{--page:min(1280px,100% - 1.75rem)}
+  .topnav{display:none}
+  .cards{grid-template-columns:1fr}
+  .gauge{grid-template-columns:repeat(2,1fr);gap:var(--s4)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .card-hd{grid-template-columns:auto minmax(0,1fr)}
+  .who{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+  .card:hover{transform:none}
+}
+@media print{
+  .topbar{display:none}
+  .dark{background:#fff;color:#0B1B2B;--ink:#0B1B2B;--ink-2:#40525F;--surface:#fff;--sunk:#F1F4F6;--line:rgba(11,27,43,.2)}
+  .hero::after{display:none}
+  .card,.slab,.knob,.lay,.matrix,.note{box-shadow:none;break-inside:avoid}
+  .band{padding-block:var(--s6)}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap topbar-in">
+    <div class="logo"><i>C+</i> Creator+ Component System</div>
+    <nav aria-label="Sections">
+      <ul class="topnav">
+        <li><a href="#foundations">Foundations</a></li>
+        <li><a href="#layouts">Layouts</a></li>
+        <li><a href="#elements">Elements</a></li>
+        <li><a href="#practices">Practices</a></li>
+        <li><a href="#handoff">Handoff</a></li>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<!-- ═════ HERO ═════ -->
+<header class="hero dark">
+  <div class="wrap hero-in">
+    <div>
+      <span class="eyebrow">D2L Brightspace · Course experience proposal</span>
+      <h1>Twenty components.<br><span>Eight</span> surfaces you can brand.</h1>
+      <p class="hero-lede">Creator+ ships <b>content templates, not design templates</b>. An author picks a structure and fills in fields; Brightspace renders it with a single institution-wide theme.</p>
+      <p class="hero-lede">That theme reaches eight named surfaces — not whole components. Every card below states exactly where the university's colour will appear, and where it won't.</p>
+      <div class="stats">
+        <div><b>9</b><span>Elements</span></div>
+        <div><b>7</b><span>Practice types</span></div>
+        <div><b>4</b><span>Layouts</span></div>
+        <div><b>8</b><span>Themed surfaces</span></div>
+      </div>
+    </div>
+
+    <div class="keycard">
+      <h2>How to read every card</h2>
+      <p>Each component is scored on four axes — content, structure, visual and behaviour.</p>
+      <ul class="keylist">
+        <li><span class="chip open">Open</span><div><b>Author decides</b><p>Types or uploads whatever the course needs.</p></div></li>
+        <li><span class="chip fixed">Fixed set</span><div><b>Pick from a list</b><p>Options D2L defines. New ones can't be added.</p></div></li>
+        <li><span class="chip lock">Locked</span><div><b>Inherited</b><p>Comes from the institution theme, not the instance.</p></div></li>
+        <li><span class="chip limit">Hard limit</span><div><b>Breaks if ignored</b><p>A ceiling in the product, not a guideline.</p></div></li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- ═════ 01 FOUNDATIONS ═════ -->
+<section class="band" id="foundations">
+  <div class="wrap">
+    <div class="shead">
+      <span class="snum" aria-hidden="true">01</span>
+      <div>
+        <span class="eyebrow">Foundations</span>
+        <h2>The four knobs, and the eight surfaces they touch</h2>
+        <p>These four settings are the entire visual surface the university controls. They live in the Content Styler, an admin tool, and apply to every content page in the org unit — so a faculty cannot have its own accent unless it becomes a separate org unit.</p>
+        <p>Critically, each knob affects a short, published list of surfaces rather than whole components. The lists below are D2L's, not our interpretation.</p>
+      </div>
+    </div>
+
+    <div class="knobs">
+      <div class="knob">
+        <div class="sw" style="background:#EF6C24"></div>
+        <h3>Accent</h3>
+        <p>Decorative only. D2L states it is not required for accessibility.</p>
+        <div class="applies"><b>Applies to</b>Standard callout border · blockquote left line · blockquote large quote icon · Heading 1 underline · accordion numbered divider</div>
+      </div>
+      <div class="knob">
+        <div class="sw" style="background:#B8480F"></div>
+        <h3>Accessible accent</h3>
+        <p>Sits behind white text, so it must clear contrast on its own.</p>
+        <div class="applies"><b>Applies to</b>Jumbo callout background · timeline panel heading background · timeline panel arrow background</div>
+      </div>
+      <div class="knob">
+        <div class="sw" style="background:#0B1B2B"></div>
+        <h3>Header colour</h3>
+        <p>Must be accessible on a white background.</p>
+        <div class="applies"><b>Applies to</b>Headings 1 through 6, on every content page</div>
+      </div>
+      <div class="knob">
+        <div class="sw" style="background:#fff;display:grid;place-items:center"><span style="font-family:var(--f-head);font-weight:900;font-size:2rem;letter-spacing:-.04em">Aa</span></div>
+        <h3>Header font</h3>
+        <p>Headings only. Body text is unaffected.</p>
+        <div class="applies"><b>Applies to</b>Headings 1 through 6. Paragraphs and all other elements keep the platform font</div>
+      </div>
+    </div>
+
+    <div class="note limit">
+      <h4>Everything else is neutral, and stays neutral</h4>
+      <p>Tabs, click and reveal, flip cards, carousels and hotspot markers take <b>no theme colour at all</b>. Do not present them in university colours — the platform will not render them that way, and the gap surfaces the first time a lecturer builds a real page.</p>
+      <p style="margin:0">Reaching further needs a university-hosted CSS file linked through <code>d2l.Tools.ContentStyler.CssOverride</code>, overriding <code>--d2l-cplus-color-primary</code> (accent), <code>--d2l-cplus-color-primary-dark</code> (accessible accent), <code>--d2l-cplus-color-neutral-one-head</code> (header colour) and <code>--d2l-cplus-font-family-one</code> (header font). That is development work. Price it separately.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═════ 02 LAYOUTS ═════ -->
+<section class="band" id="layouts" style="background:var(--sunk)">
+  <div class="wrap">
+    <div class="shead">
+      <span class="snum" aria-hidden="true">02</span>
+      <div>
+        <span class="eyebrow">Structure</span>
+        <h2>Layouts</h2>
+        <p>Four fixed panel splits. Any element can sit inside a panel. No custom columns, no gutter or padding control, no nesting, and no author-set stacking order on narrow screens — panels collapse to one column in source order.</p>
+      </div>
+    </div>
+
+    <div class="layouts">
+      <div class="lay"><div class="pnl"><div style="flex:1">1</div><div style="flex:1">2</div></div><h3>Two panels</h3><span>50 / 50</span></div>
+      <div class="lay"><div class="pnl"><div style="flex:2">1</div><div style="flex:1">2</div></div><h3>Two thirds, one third</h3><span>67 / 33</span></div>
+      <div class="lay"><div class="pnl"><div style="flex:1">1</div><div style="flex:2">2</div></div><h3>One third, two thirds</h3><span>33 / 67</span></div>
+      <div class="lay"><div class="pnl"><div style="flex:1">1</div><div style="flex:1">2</div><div style="flex:1">3</div></div><h3>Three panels</h3><span>33 / 33 / 33</span></div>
+    </div>
+
+    <div class="note fixed">
+      <h4>Show the mobile stack for every pattern we propose</h4>
+      <p style="margin:0">A 67/33 “content plus sidebar” reads completely differently once the sidebar lands below the fold. This is the most common mistake with Layouts, and the one a committee will spot on their own phone during the meeting.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═════ 03 ELEMENTS ═════ -->
+<section class="band" id="elements">
+  <div class="wrap">
+    <div class="shead">
+      <span class="snum" aria-hidden="true">03</span>
+      <div>
+        <span class="eyebrow">Components</span>
+        <h2>Elements</h2>
+        <p>Shared across all nine: inserted elements <b>cannot be edited on the page canvas</b> — the author must reopen the Insert Element workflow. Selecting one offers only edit, move up, move down and delete.</p>
+        <p><code>Learner Instructions</code> exists on every interactive element and should be treated as required, not optional. It is what tells a student the thing is clickable.</p>
+      </div>
+    </div>
+
+    <!-- FOUR-AXIS EXPLAINER -->
+    <div class="axes-block">
+      <div class="axes-intro">
+        <h3>First, the four axes</h3>
+        <p>Every component in this document is measured the same four ways. Each axis answers one question a lecturer will actually ask when they sit down to build a page.</p>
+      </div>
+
+      <div class="axes">
+        <div class="axis">
+          <p class="axis-q">“What can I put in it?”</p>
+          <h4>Content</h4>
+          <p>The words, images, video and links the lecturer supplies. Anything they type or upload.</p>
+          <div class="axis-eg"><b>For example</b>The heading and body text inside an accordion folder, or the image on a flip card.</div>
+          <div class="axis-usual"><span>Usually</span> <span class="chip open">Open</span></div>
+        </div>
+
+        <div class="axis">
+          <p class="axis-q">“How can I arrange it?”</p>
+          <h4>Structure</h4>
+          <p>How many parts there are and how they sit together — item counts, orientation, and the layout options D2L offers.</p>
+          <div class="axis-eg"><b>For example</b>Whether an accordion is numbered, whether tabs run across or down the side, how many slides a carousel holds.</div>
+          <div class="axis-usual"><span>Usually</span> <span class="chip fixed">Fixed set</span></div>
+        </div>
+
+        <div class="axis">
+          <p class="axis-q">“Can I change how it looks?”</p>
+          <h4>Visual</h4>
+          <p>Colour, typeface, spacing, borders, corner radius and icons — the styling of the component itself.</p>
+          <div class="axis-eg"><b>For example</b>The colour of an accordion divider, the fill on an active tab, the border on a callout.</div>
+          <div class="axis-usual"><span>Usually</span> <span class="chip lock">Locked</span></div>
+        </div>
+
+        <div class="axis">
+          <p class="axis-q">“What does it do when clicked?”</p>
+          <h4>Behaviour</h4>
+          <p>How the component responds to a student — what expands, what animates, what plays, and what feedback appears.</p>
+          <div class="axis-eg"><b>For example</b>Whether a folder can start already open, whether a carousel autoplays, how fast a card flips.</div>
+          <div class="axis-usual"><span>Usually</span> <span class="chip lock">Locked</span></div>
+        </div>
+      </div>
+
+      <div class="axes-close">
+        <p>Read the “usually” row across and you have the whole product in one line: <b>lecturers own the content, choose from a fixed menu of structures, and control neither the look nor the behaviour.</b> The matrix below shows where the exceptions are.</p>
+      </div>
+    </div>
+
+    <div class="matrix dark">
+      <div class="matrix-hd">
+        <h3>Control matrix, all nine elements at a glance</h3>
+        <p>Read the <b>Visual</b> column straight down. One cell is highlighted: Hotspot is the only element where an author picks a colour, and that colour comes from a marker picker rather than the institution theme.</p>
+      </div>
+      <div class="scroll">
+        <table class="mtable">
+          <thead><tr><th scope="col">Element</th><th scope="col">Content</th><th scope="col">Structure</th><th scope="col">Visual</th><th scope="col">Behaviour</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Accordion</th><td><span class="chip open">Open</span></td><td><span class="chip fixed">Two formats</span></td><td><span class="chip lock">Locked</span></td><td><span class="chip lock">Locked</span></td></tr>
+            <tr><th scope="row">Tabs</th><td><span class="chip open">Open</span></td><td><span class="chip fixed">Two formats</span></td><td><span class="chip lock">Locked</span></td><td><span class="chip lock">Locked</span></td></tr>
+            <tr><th scope="row">Click and Reveal</th><td><span class="chip open">Open</span></td><td><span class="chip fixed">Two formats</span></td><td><span class="chip lock">Locked</span></td><td><span class="chip lock">Locked</span></td></tr>
+            <tr><th scope="row">Callout</th><td><span class="chip open">Open</span></td><td><span class="chip fixed">Four formats</span></td><td><span class="chip lock">Locked</span></td><td><span class="chip lock">Static</span></td></tr>
+            <tr><th scope="row">Timeline</th><td><span class="chip open">Open</span></td><td><span class="chip fixed">Two aligns</span></td><td><span class="chip lock">Locked</span></td><td><span class="chip lock">Static</span></td></tr>
+            <tr><th scope="row">Stylized Quote</th><td><span class="chip open">Open</span></td><td><span class="chip fixed">Two formats</span></td><td><span class="chip lock">Locked</span></td><td><span class="chip lock">Static</span></td></tr>
+            <tr><th scope="row">Flip Cards</th><td><span class="chip limit">25 characters</span></td><td><span class="chip fixed">Rows, items</span></td><td><span class="chip lock">Locked</span></td><td><span class="chip lock">Locked</span></td></tr>
+            <tr><th scope="row">Carousel</th><td><span class="chip open">Open</span></td><td><span class="chip fixed">Slide count</span></td><td><span class="chip lock">Locked</span></td><td><span class="chip lock">Locked</span></td></tr>
+            <tr><th scope="row">Hotspot</th><td><span class="chip open">Open</span></td><td><span class="chip limit">Nine maximum</span></td><td class="spot"><span class="chip fixed">Marker colour</span></td><td><span class="chip fixed">Two a11y modes</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="cards">
+
+      <!-- ACCORDION -->
+      <article class="card">
+        <div class="card-hd">
+          <span class="badge" aria-hidden="true">01</span>
+          <div><h3>Accordion</h3><p>Collapsible sections. Main ideas visible first, detail on expand.</p></div>
+          <span class="who">Lecturer</span>
+        </div>
+        <div class="pv">
+          <svg viewBox="0 0 320 122" role="img" aria-label="Accordion preview: numbered rows, the second expanded, with an accent-coloured divider line">
+            <rect x="1" y="1" width="318" height="26" rx="8" fill="#fff"/>
+            <text x="15" y="18" font-family="Figtree" font-size="10" font-weight="700" fill="#7E92A3">1</text>
+            <text x="30" y="18" font-family="Inter" font-size="10" fill="#4C5F70">Assessment criteria</text>
+            <path d="M296 11l5 5 5-5" stroke="#7E92A3" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+            <rect x="1" y="26" width="318" height="2" fill="#EF6C24"/>
+            <rect x="1" y="31" width="318" height="26" rx="8" fill="#fff"/>
+            <text x="15" y="48" font-family="Figtree" font-size="10" font-weight="700" fill="#0B1B2B">2</text>
+            <text x="30" y="48" font-family="Inter" font-size="10" font-weight="600" fill="#0B1B2B">Submission format</text>
+            <path d="M296 46l5-5 5 5" stroke="#0B1B2B" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+            <rect x="1" y="57" width="318" height="36" rx="8" fill="#fff"/>
+            <rect x="30" y="67" width="228" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="30" y="78" width="266" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="1" y="92" width="318" height="2" fill="#EF6C24"/>
+            <rect x="1" y="97" width="318" height="25" rx="8" fill="#fff"/>
+            <text x="15" y="114" font-family="Figtree" font-size="10" font-weight="700" fill="#7E92A3">3</text>
+            <text x="30" y="114" font-family="Inter" font-size="10" fill="#4C5F70">Referencing style</text>
+            <path d="M296 107l5 5 5-5" stroke="#7E92A3" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <dl class="gauge">
+          <div><dt>Content</dt><dd><span class="chip open">Open</span></dd></div>
+          <div><dt>Structure</dt><dd><span class="chip fixed">Two formats</span></dd></div>
+          <div><dt>Visual</dt><dd><span class="chip lock">Locked</span></dd></div>
+          <div><dt>Behaviour</dt><dd><span class="chip lock">Locked</span></dd></div>
+        </dl>
+        <div class="theme">
+          <i aria-hidden="true"></i>
+          <div><b>Where the theme colour appears</b><span>The numbered divider line, and only when the numbered format is chosen. Row backgrounds and chevrons stay neutral.</span></div>
+        </div>
+        <div class="card-body">
+          <div class="spec o"><h4>Author fills in</h4><ul>
+            <li>Format option — numbered or unnumbered folders</li><li>Learner instructions</li>
+            <li>Per item: tab title and content</li><li><code>+ Add Accordion Item</code> for more</li></ul></div>
+          <div class="spec l"><h4>Locked</h4><ul>
+            <li>No expand-all control, no default-open state, no icon choice, no per-folder colour</li></ul></div>
+        </div>
+        <div class="card-ft">
+          <div><b>Use for</b>FAQ, glossary, layered detail, optional deep-dives</div>
+          <div><b>Not for</b>Required reading — collapsed content gets skipped and drops out of in-page search</div>
+          <div class="vs"><span>Numbered=T/F</span><span>State=closed/open</span><span>Items=3/5/8</span></div>
+        </div>
+      </article>
+
+      <!-- TABS -->
+      <article class="card">
+        <div class="card-hd">
+          <span class="badge" aria-hidden="true">02</span>
+          <div><h3>Tabs</h3><p>Related information in a series — hypothesis, method, findings.</p></div>
+          <span class="who">Lecturer</span>
+        </div>
+        <div class="pv">
+          <svg viewBox="0 0 320 122" role="img" aria-label="Tabs preview: three neutral tabs, the first selected, above a content panel">
+            <rect x="1" y="1" width="86" height="27" rx="8" fill="#0B1B2B"/>
+            <text x="19" y="19" font-family="Inter" font-size="10" font-weight="600" fill="#fff">Method</text>
+            <rect x="93" y="1" width="86" height="27" rx="8" fill="#fff"/>
+            <text x="111" y="19" font-family="Inter" font-size="10" fill="#7E92A3">Results</text>
+            <rect x="185" y="1" width="86" height="27" rx="8" fill="#fff"/>
+            <text x="203" y="19" font-family="Inter" font-size="10" fill="#7E92A3">Review</text>
+            <rect x="1" y="34" width="318" height="88" rx="10" fill="#fff"/>
+            <rect x="15" y="48" width="74" height="60" rx="7" fill="#E8EDF1"/>
+            <circle cx="43" cy="70" r="9" fill="#D2DBE2"/><rect x="27" y="85" width="32" height="4" rx="2" fill="#D2DBE2"/>
+            <rect x="101" y="52" width="200" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="101" y="64" width="184" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="101" y="76" width="200" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="101" y="88" width="128" height="4" rx="2" fill="#DEE5EA"/>
+          </svg>
+        </div>
+        <dl class="gauge">
+          <div><dt>Content</dt><dd><span class="chip open">Open</span></dd></div>
+          <div><dt>Structure</dt><dd><span class="chip fixed">Two formats</span></dd></div>
+          <div><dt>Visual</dt><dd><span class="chip lock">Locked</span></dd></div>
+          <div><dt>Behaviour</dt><dd><span class="chip lock">Locked</span></dd></div>
+        </dl>
+        <div class="theme none">
+          <i aria-hidden="true"></i>
+          <div><b>Where the theme colour appears</b><span>Nowhere. Tabs are on neither of D2L's accent lists — the active tab and bar render in platform neutrals whatever the institution accent is set to.</span></div>
+        </div>
+        <div class="card-body">
+          <div class="spec o"><h4>Author fills in</h4><ul>
+            <li>Format option — horizontal or vertical</li><li>Learner instructions</li>
+            <li>Per tab: title and content, images supported</li><li><code>Add Tab Item</code> for more</li></ul></div>
+          <div class="spec l"><h4>Locked</h4><ul>
+            <li>Two orientations only, no tab icons, no per-tab colour. Long titles wrap and break the bar.</li></ul></div>
+          <div class="spec x"><h4>Verify before we recommend it</h4><ul>
+            <li>Lecturers report the Brightspace accessibility checker raising a warning on Tabs. Test on the university's own version. If it still fires, drop Tabs from the approved set or pair it with an accordion alternative.</li></ul></div>
+        </div>
+        <div class="card-ft">
+          <div><b>Use for</b>Parallel, comparable chunks of similar length</div>
+          <div><b>Not for</b>Sequential steps, or more than about five tabs</div>
+          <div class="vs"><span>Orient=h/v</span><span>Tabs=3/5</span><span>State=default/overflow</span></div>
+        </div>
+      </article>
+
+      <!-- CLICK AND REVEAL -->
+      <article class="card">
+        <div class="card-hd">
+          <span class="badge" aria-hidden="true">03</span>
+          <div><h3>Click and Reveal</h3><p>Asks a student to commit to an answer before showing it.</p></div>
+          <span class="who">Lecturer</span>
+        </div>
+        <div class="pv">
+          <svg viewBox="0 0 320 122" role="img" aria-label="Click and reveal preview: prompt, neutral button, revealed answer panel">
+            <rect x="1" y="6" width="244" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="1" y="18" width="192" height="4" rx="2" fill="#DEE5EA"/>
+            <circle cx="14" cy="46" r="12" fill="#E8EDF1"/>
+            <text x="10" y="50" font-family="Figtree" font-size="12" font-weight="800" fill="#4C5F70">?</text>
+            <rect x="36" y="34" width="140" height="25" rx="12.5" fill="#0B1B2B"/>
+            <text x="53" y="50" font-family="Inter" font-size="10" font-weight="600" fill="#fff">Reveal the answer</text>
+            <rect x="1" y="70" width="318" height="52" rx="10" fill="#fff"/>
+            <rect x="16" y="84" width="258" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="16" y="96" width="276" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="16" y="108" width="180" height="4" rx="2" fill="#DEE5EA"/>
+          </svg>
+        </div>
+        <dl class="gauge">
+          <div><dt>Content</dt><dd><span class="chip open">Open</span></dd></div>
+          <div><dt>Structure</dt><dd><span class="chip fixed">Two formats</span></dd></div>
+          <div><dt>Visual</dt><dd><span class="chip lock">Locked</span></dd></div>
+          <div><dt>Behaviour</dt><dd><span class="chip lock">Locked</span></dd></div>
+        </dl>
+        <div class="theme none">
+          <i aria-hidden="true"></i>
+          <div><b>Where the theme colour appears</b><span>Nowhere. The button and revealed panel render in platform neutrals.</span></div>
+        </div>
+        <div class="card-body">
+          <div class="spec o"><h4>Author fills in</h4><ul>
+            <li>Format option — no icon, or question mark</li>
+            <li>Introductory content and learner instructions</li>
+            <li>Button label and revealed content</li></ul></div>
+          <div class="spec l"><h4>Locked</h4><ul>
+            <li>One reveal per element, so several means several elements. No animation control.</li></ul></div>
+        </div>
+        <div class="card-ft">
+          <div><b>Use for</b>Self-check, predict-then-confirm, optional worked solutions</div>
+          <div class="vs"><span>Format=none/question</span><span>State=before/after</span></div>
+        </div>
+      </article>
+
+      <!-- CALLOUT -->
+      <article class="card">
+        <div class="card-hd">
+          <span class="badge" aria-hidden="true">04</span>
+          <div><h3>Callout</h3><p>Lifts a key detail out of the main flow. The element lecturers reach for most.</p></div>
+          <span class="who">Lecturer</span>
+        </div>
+        <div class="pv">
+          <svg viewBox="0 0 320 122" role="img" aria-label="Callout preview: standard with accent border, question, attention, and jumbo with accessible accent background">
+            <rect x="1.5" y="1.5" width="152" height="40" rx="9" fill="#fff" stroke="#EF6C24" stroke-width="2"/>
+            <text x="16" y="18" font-family="Inter" font-size="9" font-weight="700" fill="#0B1B2B">Standard</text>
+            <rect x="16" y="27" width="108" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="165" y="1" width="154" height="40" rx="9" fill="#fff"/>
+            <circle cx="180" cy="16" r="7.5" fill="#E8EDF1"/>
+            <text x="177" y="19.5" font-family="Figtree" font-size="9" font-weight="800" fill="#4C5F70">?</text>
+            <text x="195" y="19" font-family="Inter" font-size="9" font-weight="700" fill="#0B1B2B">Question</text>
+            <rect x="180" y="28" width="108" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="1" y="49" width="152" height="40" rx="9" fill="#fff"/>
+            <text x="16" y="66" font-family="Inter" font-size="9" font-weight="700" fill="#0B1B2B">Attention</text>
+            <rect x="16" y="75" width="108" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="165" y="49" width="154" height="73" rx="11" fill="#B8480F"/>
+            <text x="181" y="76" font-family="Figtree" font-size="18" font-weight="900" fill="#fff" letter-spacing="-.5">Jumbo</text>
+            <rect x="181" y="88" width="122" height="4" rx="2" fill="rgba(255,255,255,.55)"/>
+            <rect x="181" y="100" width="106" height="4" rx="2" fill="rgba(255,255,255,.55)"/>
+            <rect x="181" y="112" width="122" height="4" rx="2" fill="rgba(255,255,255,.55)"/>
+          </svg>
+        </div>
+        <dl class="gauge">
+          <div><dt>Content</dt><dd><span class="chip open">Open</span></dd></div>
+          <div><dt>Structure</dt><dd><span class="chip fixed">Four formats</span></dd></div>
+          <div><dt>Visual</dt><dd><span class="chip lock">Locked</span></dd></div>
+          <div><dt>Behaviour</dt><dd><span class="chip lock">Static</span></dd></div>
+        </dl>
+        <div class="theme">
+          <i aria-hidden="true"></i>
+          <div><b>Where the theme colour appears</b><span>Two places. The standard callout's <b>border</b> takes the accent; the jumbo callout's <b>background</b> takes the accessible accent behind white text. Question and attention are on neither list.</span></div>
+        </div>
+        <div class="card-body">
+          <div class="spec o"><h4>Author fills in</h4><ul>
+            <li>Format option — no icon, question, attention or jumbo</li>
+            <li>Title and callout content, with text styling</li></ul></div>
+          <div class="spec l"><h4>Locked</h4><ul>
+            <li>Exactly four formats. No custom icons, border style or background.</li></ul></div>
+          <div class="spec x"><h4>Needs a governance rule</h4><ul>
+            <li>Document one meaning per format — attention for deadlines and assessment weighting only, for instance. Without a rule every callout becomes attention and the signal dies.</li></ul></div>
+        </div>
+        <div class="card-ft">
+          <div><b>Highest-value frame</b>The four formats side by side are a genuine mini design system, and two of them carry brand colour. Lead the pitch with this.</div>
+          <div class="vs"><span>Format=standard/question/attention/jumbo</span><span>HasTitle=T/F</span></div>
+        </div>
+      </article>
+
+      <!-- TIMELINE -->
+      <article class="card">
+        <div class="card-hd">
+          <span class="badge" aria-hidden="true">05</span>
+          <div><h3>Timeline</h3><p>Events over time, steps in a process, or two sides of a conversation.</p></div>
+          <span class="who">Lecturer</span>
+        </div>
+        <div class="pv">
+          <svg viewBox="0 0 320 122" role="img" aria-label="Timeline preview: alternating panels with accent-coloured heading bars and a neutral central rail">
+            <line x1="160" y1="4" x2="160" y2="118" stroke="#D2DBE2" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="160" cy="21" r="5" fill="#7E92A3"/>
+            <rect x="24" y="6" width="118" height="31" rx="8" fill="#fff"/>
+            <path d="M32 6h102a8 8 0 018 8v3H24v-3a8 8 0 018-8z" fill="#B8480F"/>
+            <text x="32" y="15" font-family="Inter" font-size="8" font-weight="600" fill="#fff">Week 1</text>
+            <rect x="32" y="24" width="86" height="4" rx="2" fill="#DEE5EA"/>
+            <circle cx="160" cy="63" r="5" fill="#7E92A3"/>
+            <rect x="178" y="48" width="118" height="31" rx="8" fill="#fff"/>
+            <path d="M186 48h102a8 8 0 018 8v3H178v-3a8 8 0 018-8z" fill="#B8480F"/>
+            <text x="186" y="57" font-family="Inter" font-size="8" font-weight="600" fill="#fff">Week 4</text>
+            <rect x="186" y="66" width="86" height="4" rx="2" fill="#DEE5EA"/>
+            <circle cx="160" cy="105" r="5" fill="#7E92A3"/>
+            <rect x="24" y="90" width="118" height="31" rx="8" fill="#fff"/>
+            <path d="M32 90h102a8 8 0 018 8v3H24v-3a8 8 0 018-8z" fill="#B8480F"/>
+            <text x="32" y="99" font-family="Inter" font-size="8" font-weight="600" fill="#fff">Week 9</text>
+            <rect x="32" y="108" width="86" height="4" rx="2" fill="#DEE5EA"/>
+          </svg>
+        </div>
+        <dl class="gauge">
+          <div><dt>Content</dt><dd><span class="chip open">Open</span></dd></div>
+          <div><dt>Structure</dt><dd><span class="chip fixed">Two aligns</span></dd></div>
+          <div><dt>Visual</dt><dd><span class="chip lock">Locked</span></dd></div>
+          <div><dt>Behaviour</dt><dd><span class="chip lock">Static</span></dd></div>
+        </dl>
+        <div class="theme">
+          <i aria-hidden="true"></i>
+          <div><b>Where the theme colour appears</b><span>The <b>panel heading background</b> and the <b>panel arrow background</b>, both from the accessible accent since they sit behind white text. The central rail and nodes stay neutral.</span></div>
+        </div>
+        <div class="card-body">
+          <div class="spec o"><h4>Author fills in</h4><ul>
+            <li>Format option — left-aligned or alternating</li>
+            <li>Per panel: title and text</li><li><code>Add Item</code> for more</li></ul></div>
+          <div class="spec l"><h4>Locked</h4><ul>
+            <li>No separate date or icon field, so dates live in the title text. No per-node colour, no horizontal orientation.</li></ul></div>
+        </div>
+        <div class="card-ft">
+          <div><b>Show honestly</b>Alternating is elegant at four panels and chaotic at ten. On mobile it collapses to left-aligned anyway.</div>
+          <div class="vs"><span>Align=left/alternating</span><span>Panels=3/8</span></div>
+        </div>
+      </article>
+
+      <!-- STYLIZED QUOTE -->
+      <article class="card">
+        <div class="card-hd">
+          <span class="badge" aria-hidden="true">06</span>
+          <div><h3>Stylized Quote</h3><p>Large quotation marks and colour to set quoted material apart.</p></div>
+          <span class="who">Lecturer</span>
+        </div>
+        <div class="pv">
+          <svg viewBox="0 0 320 122" role="img" aria-label="Stylized quote preview: accent-coloured left line and large quote glyph, neutral text">
+            <rect x="1" y="14" width="3" height="94" rx="1.5" fill="#EF6C24"/>
+            <text x="16" y="80" font-family="Figtree" font-weight="900" font-size="88" fill="#EF6C24">&#8220;</text>
+            <rect x="92" y="30" width="222" height="5" rx="2.5" fill="#DEE5EA"/>
+            <rect x="92" y="48" width="202" height="5" rx="2.5" fill="#DEE5EA"/>
+            <rect x="92" y="66" width="150" height="5" rx="2.5" fill="#DEE5EA"/>
+            <text x="92" y="102" font-family="Inter" font-size="9" font-weight="600" fill="#4C5F70">Attribution</text>
+          </svg>
+        </div>
+        <dl class="gauge">
+          <div><dt>Content</dt><dd><span class="chip open">Open</span></dd></div>
+          <div><dt>Structure</dt><dd><span class="chip fixed">Two formats</span></dd></div>
+          <div><dt>Visual</dt><dd><span class="chip lock">Locked</span></dd></div>
+          <div><dt>Behaviour</dt><dd><span class="chip lock">Static</span></dd></div>
+        </dl>
+        <div class="theme">
+          <i aria-hidden="true"></i>
+          <div><b>Where the theme colour appears</b><span>Two places, both accent: the <b>left line</b> on the standard format and the <b>large quote icon</b>. This is the most brand-visible element in the set.</span></div>
+        </div>
+        <div class="card-body">
+          <div class="spec o"><h4>Author fills in</h4><ul>
+            <li>Format option — standard or large focus</li><li>Quotation and attribution</li></ul></div>
+          <div class="spec l"><h4>Locked</h4><ul>
+            <li>Quote-mark glyph shape is fixed. No author image, no citation link field.</li></ul></div>
+        </div>
+        <div class="card-ft">
+          <div><b>Show</b>Both formats at one line and at five-plus lines. Large focus with a long quote is the common misuse.</div>
+          <div class="vs"><span>Format=standard/large</span><span>Length=short/long</span></div>
+        </div>
+      </article>
+
+      <!-- FLIP CARDS -->
+      <article class="card">
+        <div class="card-hd">
+          <span class="badge" aria-hidden="true">07</span>
+          <div><h3>Flip Cards</h3><p>Grouped related items with no required order. Strongest with images.</p></div>
+          <span class="who">Lecturer</span>
+        </div>
+        <div class="pv">
+          <svg viewBox="0 0 320 122" role="img" aria-label="Flip cards preview: three neutral cards, the third showing its reverse">
+            <rect x="1" y="12" width="100" height="100" rx="11" fill="#fff"/>
+            <rect x="13" y="24" width="76" height="42" rx="7" fill="#E8EDF1"/>
+            <circle cx="51" cy="42" r="8" fill="#D2DBE2"/><rect x="35" y="55" width="32" height="4" rx="2" fill="#D2DBE2"/>
+            <text x="13" y="82" font-family="Inter" font-size="9" font-weight="600" fill="#0B1B2B">Osmosis</text>
+            <rect x="13" y="90" width="60" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="110" y="12" width="100" height="100" rx="11" fill="#fff"/>
+            <rect x="122" y="24" width="76" height="42" rx="7" fill="#E8EDF1"/>
+            <circle cx="160" cy="42" r="8" fill="#D2DBE2"/><rect x="144" y="55" width="32" height="4" rx="2" fill="#D2DBE2"/>
+            <text x="122" y="82" font-family="Inter" font-size="9" font-weight="600" fill="#0B1B2B">Diffusion</text>
+            <rect x="122" y="90" width="60" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="219" y="12" width="100" height="100" rx="11" fill="#0B1B2B"/>
+            <text x="231" y="34" font-family="Inter" font-size="8" font-weight="600" fill="#A9BECE">Back</text>
+            <rect x="231" y="46" width="76" height="4" rx="2" fill="rgba(255,255,255,.4)"/>
+            <rect x="231" y="58" width="66" height="4" rx="2" fill="rgba(255,255,255,.4)"/>
+            <rect x="231" y="70" width="76" height="4" rx="2" fill="rgba(255,255,255,.4)"/>
+            <rect x="231" y="82" width="44" height="4" rx="2" fill="rgba(255,255,255,.4)"/>
+            <path d="M292 99l6-6 6 6" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <dl class="gauge">
+          <div><dt>Content</dt><dd><span class="chip limit">25 characters</span></dd></div>
+          <div><dt>Structure</dt><dd><span class="chip fixed">Rows, items</span></dd></div>
+          <div><dt>Visual</dt><dd><span class="chip lock">Locked</span></dd></div>
+          <div><dt>Behaviour</dt><dd><span class="chip lock">Locked</span></dd></div>
+        </dl>
+        <div class="theme none">
+          <i aria-hidden="true"></i>
+          <div><b>Where the theme colour appears</b><span>Nowhere. Card fronts and backs render in platform neutrals, whatever the institution accent is set to.</span></div>
+        </div>
+        <div class="card-body">
+          <div class="spec o"><h4>Author fills in</h4><ul>
+            <li>Learner instructions</li>
+            <li>Per card, a front and a back, each with title, optional image and content</li>
+            <li>Images need alternative text, or mark them decorative</li>
+            <li><code>Add Item</code> for another card in the row, <code>Add Row</code> for a new row</li></ul></div>
+          <div class="spec l"><h4>Locked</h4><ul>
+            <li>No flip direction or speed, no card size, no per-card colour</li></ul></div>
+          <div class="spec x"><h4>Hard limits</h4><ul>
+            <li>Keep image content to <b>four words or 25 characters</b>. Past that the card visibly breaks.</li>
+            <li>Built for grids — a single flip card is awkward and not an intended pattern.</li></ul></div>
+        </div>
+        <div class="card-ft">
+          <div><b>Use for</b>Terminology, definitions, non-sequential concept sets</div>
+          <div><b>Not for</b>Anything assessed, or content that must print</div>
+          <div class="vs"><span>Face=front/back</span><span>PerRow=2/3/4</span><span>HasImage=T/F</span></div>
+        </div>
+      </article>
+
+      <!-- CAROUSEL -->
+      <article class="card">
+        <div class="card-hd">
+          <span class="badge" aria-hidden="true">08</span>
+          <div><h3>Carousel</h3><p>Slideshow of images and text, one slide at a time, in sequence.</p></div>
+          <span class="who">Lecturer</span>
+        </div>
+        <div class="pv">
+          <svg viewBox="0 0 320 122" role="img" aria-label="Carousel preview: one slide with neutral previous and next controls and slide dots">
+            <rect x="28" y="6" width="264" height="86" rx="11" fill="#fff"/>
+            <rect x="41" y="19" width="104" height="60" rx="7" fill="#E8EDF1"/>
+            <circle cx="93" cy="43" r="10" fill="#D2DBE2"/><rect x="71" y="61" width="44" height="4" rx="2" fill="#D2DBE2"/>
+            <text x="159" y="35" font-family="Inter" font-size="10" font-weight="600" fill="#0B1B2B">Step 1 of 5</text>
+            <rect x="159" y="47" width="118" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="159" y="59" width="104" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="159" y="71" width="80" height="4" rx="2" fill="#DEE5EA"/>
+            <circle cx="12" cy="49" r="11.5" fill="#fff"/><path d="M15 44l-5 5 5 5" stroke="#7E92A3" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+            <circle cx="308" cy="49" r="11.5" fill="#0B1B2B"/><path d="M305 44l5 5-5 5" stroke="#fff" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+            <rect x="140" y="106" width="18" height="5" rx="2.5" fill="#0B1B2B"/>
+            <circle cx="168" cy="108.5" r="2.5" fill="#D2DBE2"/>
+            <circle cx="180" cy="108.5" r="2.5" fill="#D2DBE2"/>
+            <circle cx="192" cy="108.5" r="2.5" fill="#D2DBE2"/>
+          </svg>
+        </div>
+        <dl class="gauge">
+          <div><dt>Content</dt><dd><span class="chip open">Open</span></dd></div>
+          <div><dt>Structure</dt><dd><span class="chip fixed">Slide count</span></dd></div>
+          <div><dt>Visual</dt><dd><span class="chip lock">Locked</span></dd></div>
+          <div><dt>Behaviour</dt><dd><span class="chip lock">Locked</span></dd></div>
+        </dl>
+        <div class="theme none">
+          <i aria-hidden="true"></i>
+          <div><b>Where the theme colour appears</b><span>Nowhere. Controls, counter and dots render in platform neutrals.</span></div>
+        </div>
+        <div class="card-body">
+          <div class="spec o"><h4>Author fills in</h4><ul>
+            <li>Learner instructions</li><li>Per slide: image, title and text</li><li><code>Add Slide</code> for more</li></ul></div>
+          <div class="spec l"><h4>Locked</h4><ul>
+            <li>No autoplay control, no transition choice, no thumbnail navigation, no counter styling</li></ul></div>
+          <div class="spec x"><h4>Not possible, so don't design it</h4><ul>
+            <li>Practices <b>cannot</b> be nested inside a carousel. The slide fields don't accept them, so a “flip through the quiz questions” pattern cannot be built.</li></ul></div>
+        </div>
+        <div class="card-ft">
+          <div><b>Use for</b>Sequential steps with strong imagery</div>
+          <div><b>Not for</b>Reference material, or anything compared side by side</div>
+          <div class="vs"><span>Slide=first/mid/last</span><span>View=desktop/mobile</span></div>
+        </div>
+      </article>
+
+      <!-- HOTSPOT -->
+      <article class="card">
+        <div class="card-hd">
+          <span class="badge" aria-hidden="true">09</span>
+          <div><h3>Hotspot</h3><p>Interactive image with selectable markers. The most capable element, and the most constrained — give it two Figma frames.</p></div>
+          <span class="who">Lecturer</span>
+        </div>
+        <div class="pv">
+          <svg viewBox="0 0 320 122" role="img" aria-label="Hotspot preview: image with author-coloured markers, progress bar and detail panel">
+            <rect x="1" y="16" width="186" height="100" rx="10" fill="#E8EDF1"/>
+            <rect x="1" y="5" width="186" height="5" rx="2.5" fill="#DEE5EA"/>
+            <rect x="1" y="5" width="104" height="5" rx="2.5" fill="#5D6D7C"/>
+            <circle cx="46" cy="48" r="11.5" fill="#1B6FC4"/><path d="M41 48l3.5 3.5L51 45" stroke="#fff" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+            <circle cx="118" cy="40" r="11.5" fill="#1B6FC4"/><path d="M113 40l3.5 3.5L123 37" stroke="#fff" stroke-width="1.9" fill="none" stroke-linecap="round"/>
+            <circle cx="76" cy="89" r="11.5" fill="#fff"/><text x="72.5" y="93" font-family="Figtree" font-size="10" font-weight="800" fill="#1B6FC4">3</text>
+            <circle cx="147" cy="81" r="11.5" fill="#fff"/><text x="143.5" y="85" font-family="Figtree" font-size="10" font-weight="800" fill="#1B6FC4">4</text>
+            <rect x="197" y="16" width="122" height="100" rx="10" fill="#fff"/>
+            <text x="211" y="37" font-family="Inter" font-size="9" font-weight="600" fill="#0B1B2B">Marker name</text>
+            <rect x="211" y="49" width="94" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="211" y="61" width="80" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="211" y="73" width="94" height="4" rx="2" fill="#DEE5EA"/>
+            <rect x="211" y="85" width="52" height="4" rx="2" fill="#DEE5EA"/>
+          </svg>
+        </div>
+        <dl class="gauge">
+          <div><dt>Content</dt><dd><span class="chip open">Open</span></dd></div>
+          <div><dt>Structure</dt><dd><span class="chip limit">Nine maximum</span></dd></div>
+          <div><dt>Visual</dt><dd><span class="chip fixed">Marker</span></dd></div>
+          <div><dt>Behaviour</dt><dd><span class="chip fixed">Two a11y modes</span></dd></div>
+        </dl>
+        <div class="theme none">
+          <i aria-hidden="true"></i>
+          <div><b>Where the theme colour appears</b><span>Nowhere — but this is the one element with author-set colour. The <b>marker colour comes from a picker the lecturer controls</b>, independent of the institution theme. Shown in blue here, not brand orange, to make that distinction visible.</span></div>
+        </div>
+        <div class="card-body">
+          <div class="spec o"><h4>Author fills in</h4><ul>
+            <li>Learner instructions, or keep the supplied default</li>
+            <li>Image and alternative text</li>
+            <li>Marker placement, by clicking the image</li>
+            <li>Per hotspot: a name used by authors <b>and</b> screen readers, plus content accepting text, images, video and links</li>
+            <li>Marker icon and colour, from a fixed icon set</li></ul></div>
+          <div class="spec l"><h4>Two accessibility modes, a real decision</h4><ul>
+            <li><b>Accessible hotspots only</b> — one micro alt tag per hotspot. Low authoring cost.</li>
+            <li><b>Fully accessible image</b> — splits the image into a keyboard-navigable grid with a micro alt tag per cell. Higher cost, but screen-reader users get the same context.</li></ul></div>
+          <div class="spec x"><h4>Hard limits</h4><ul>
+            <li><b>Nine markers per image, maximum.</b></li>
+            <li><b>JPG and PNG only. AVIF is not supported.</b></li>
+            <li>The progress bar and viewed-ticks are automatic and cannot be switched off</li></ul></div>
+        </div>
+        <div class="card-ft">
+          <div><b>Use for</b>Anatomy, equipment, maps, annotated diagrams, artwork analysis</div>
+          <div><b>Not for</b>More than nine points, or images the university only holds as AVIF</div>
+          <div class="vs"><span>View=author/learner</span><span>A11y=hotspots/grid</span><span>Markers=4/9</span></div>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="note brand">
+      <h4>One more themed surface, and it sits outside the elements</h4>
+      <p style="margin:0">The <b>Heading 1 underline</b> takes the accent colour on every content page. It is the most consistently visible brand touch in Creator+, appearing on every page rather than only where a lecturer chooses a particular element. Put it in the Foundations frame, not the element frames.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═════ 04 PRACTICES ═════ -->
+<section class="band dark" id="practices">
+  <div class="wrap">
+    <div class="shead">
+      <span class="snum" aria-hidden="true">04</span>
+      <div>
+        <span class="eyebrow">Formative activity</span>
+        <h2>Practices</h2>
+        <p>Interactive activities with immediate feedback. Every type shares a title, a short description <b>visible only to content editors</b>, instructions, question text, and a live preview beside the authoring form.</p>
+      </div>
+    </div>
+
+    <div class="note limit" style="margin-top:0;margin-bottom:var(--s6)">
+      <h4>Two things that would sink the pitch if we get them wrong</h4>
+      <ul>
+        <li><b>Practice scores are not saved or tracked.</b> They exist only to give the learner immediate feedback. If the university wants analytics on where students struggle, Practices are the wrong tool and they need Quizzes.</li>
+        <li><b>Sandboxed courses do not render Practices.</b> Anyone demonstrating from a sandbox sees a blank space. Build the demo in a real course shell.</li>
+      </ul>
+    </div>
+
+    <div class="matrix" style="box-shadow:var(--e2)">
+      <div class="matrix-hd" style="background:var(--surface)">
+        <h3>Seven question types</h3>
+        <p>Author controls, scoring options, and which types the built-in AI can draft.</p>
+      </div>
+      <div class="scroll" style="background:var(--surface)">
+        <table class="ptable">
+          <thead><tr><th scope="col">Type</th><th scope="col">Distinctive author controls</th><th scope="col">Scoring options</th><th scope="col">AI draft</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Multiple Choice</th><td>Answers with optional images and alt text, exactly one correct, randomise answer order</td><td>—</td><td><span class="chip open">Yes</span></td></tr>
+            <tr><th scope="row">Multi-Select</th><td>Several correct answers, images and alt text, randomise answer order</td><td>All or nothing <i>(default)</i>, or right minus wrong</td><td><span class="chip open">Yes</span></td></tr>
+            <tr><th scope="row">True or False</th><td>Statement, then true or false per part</td><td>—</td><td><span class="chip open">Yes</span></td></tr>
+            <tr><th scope="row">Fill in the Blanks</th><td>Typed response, blanks written as <code>[[blank1]]</code></td><td>All or nothing, or correct selections</td><td><span class="chip open">Yes</span></td></tr>
+            <tr><th scope="row">Dropdown Fill in the Blanks</th><td>Blanks as <code>[[blank1]]</code>, then <code>Update Blanks</code>. One correct plus at least one incorrect answer per blank</td><td>All or nothing <i>(default)</i>, or correct selections</td><td><span class="chip open">Yes</span></td></tr>
+            <tr><th scope="row">Sorting</th><td>Category labels, four by default and reorderable. Sortable items per category, images and alt text on both, optional item count per category</td><td>—</td><td><span class="chip lock">No</span></td></tr>
+            <tr><th scope="row">Sequencing</th><td>Sequence steps, four by default, with sequenceable items. Images and alt text, optional numeric sequence</td><td>—</td><td><span class="chip lock">No</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="note fixed">
+      <h4>AI source restrictions</h4>
+      <p style="margin:0">Source content must be a page, a media topic with English captions, or most file types <b>excluding PDF</b>. Authors can regenerate, edit the source text, or discard, and rate quality. Put the PDF exclusion on the frame — otherwise it becomes the first support ticket.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═════ 05 HANDOFF ═════ -->
+<section class="band" id="handoff">
+  <div class="wrap">
+    <div class="shead">
+      <span class="snum" aria-hidden="true">05</span>
+      <div>
+        <span class="eyebrow">Handoff</span>
+        <h2>Building this in Figma</h2>
+        <p>The CSS custom properties at the top of this file are named to be pasted straight into a Figma variable collection without renaming. Type scale is a 1.25 ratio in rem; spacing is a 4px-derived ramp.</p>
+      </div>
+    </div>
+
+    <div class="slabs">
+      <div class="slab">
+        <h3>Page structure</h3>
+        <pre class="tree">00  Cover and narrative
+01  Foundations
+      <em>4 knobs, 8 surfaces</em>
+02  Layouts — 4 skeletons
+03  Elements — <em>9 spec frames</em>
+04  Practices — 7 spec frames
+05  Page patterns — 6 pages
+06  Governance</pre>
+      </div>
+      <div class="slab">
+        <h3>Card component</h3>
+        <p style="font-size:var(--t-micro);color:var(--ink-2);margin-bottom:var(--s4)">Build the spec card once, then instance it twenty times. Slots, top to bottom:</p>
+        <ul>
+          <li>Number badge, name and owner</li>
+          <li>One-line purpose</li>
+          <li>Component preview — trace the SVGs on this page</li>
+          <li>Control gauge, four axes</li>
+          <li><b>Where the theme colour appears</b> — the row that keeps us honest</li>
+          <li>Author fills in, locked, hard limits</li>
+          <li>Use for, not for, variant chips</li>
+        </ul>
+      </div>
+      <div class="slab">
+        <h3>Page patterns to assemble</h3>
+        <ul>
+          <li><b>Module overview</b> — jumbo callout for outcomes, plus 67/33 with an accordion of resources</li>
+          <li><b>Lesson</b> — prose, standard callout, click and reveal, multiple-choice practice</li>
+          <li><b>Reading</b> — stylized quote, tabs for perspectives, accordion further reading</li>
+          <li><b>Lab or procedure</b> — left-aligned timeline, hotspot for equipment, sequencing practice</li>
+          <li><b>Concept builder</b> — flip cards with a sorting practice</li>
+          <li><b>Assessment prep</b> — attention callout for weighting, accordion FAQ, multi-select practice</li>
+        </ul>
+      </div>
+      <div class="slab">
+        <h3>Governance frame</h3>
+        <ul>
+          <li>Alt text mandatory on every flip card, hotspot and practice image. The decorative checkbox is for genuinely decorative images only.</li>
+          <li>Learner instructions always filled</li>
+          <li>Cap interactive elements per page — three is defensible</li>
+          <li>One documented meaning per callout format</li>
+          <li>Who does what: lecturers author, admins own the four theme settings, only a developer touches CSS</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="note brand">
+      <h4>Screenshots: capture from the university's own tenant</h4>
+      <p style="margin:0">Their instance already carries their logo, navigation and current accent, so the before-and-after is about <i>their</i> course rather than a generic demo — and it avoids reusing D2L's documentation imagery. The strongest “before” is a real current page: a wall of text and a PDF link.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot dark">
+  <div class="wrap foot-in">
+    <div>
+      <span class="eyebrow">Before presenting</span>
+      <h3 style="margin-top:var(--s4)">Verify against their release</h3>
+      <p>Creator+ ships on a monthly cycle and the element set differs between releases. Check every limit here against the university's own Brightspace version — particularly the Tabs accessibility warning, the nine-marker hotspot ceiling, and whether D2L's accent lists have grown since publication.</p>
+    </div>
+    <div>
+      <span class="eyebrow">Sources</span>
+      <h3 style="margin-top:var(--s4)">D2L documentation</h3>
+      <p>Brightspace Community: <b>Use Creator+ Elements</b> (3391), <b>Layouts</b> (32041), <b>Practices</b> (32040) and <b>Content Styler</b> (4449). The accent and accessible-accent surface lists come from D2L's <b>Content Styler: Essential Guide</b> community post, which enumerates them explicitly.</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
