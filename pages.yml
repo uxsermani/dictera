@@ -1,0 +1,73 @@
+# .github/workflows/pages.yml
+#
+# ONLY NEEDED IF YOU WANT TO DEPLOY VIA GITHUB ACTIONS.
+# For a single static HTML file you do not need this file at all — see the notes
+# at the bottom. Deploying straight from a branch avoids the Node.js warning
+# entirely, because none of these actions run.
+#
+# The "Node.js 20 is deprecated" warning comes from the action versions below,
+# not from the HTML being deployed.
+
+name: Deploy static site to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read          # required by deploy-pages v4+
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # v4 runs on Node 20 and triggers the warning. v5 runs on Node 24.
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      # Uploads the whole repo root. Point `path` at a subfolder if your HTML
+      # lives in one, e.g. path: ./docs
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+# ─────────────────────────────────────────────────────────────────────────────
+# IMPORTANT CAVEAT
+#
+# actions/upload-pages-artifact is a composite action that internally pins
+# actions/upload-artifact. Until GitHub bumps that internal pin, the Node.js 20
+# warning can still appear even with every version above updated. That is
+# GitHub's to fix, not yours, and it does not stop the deployment.
+#
+# Setting FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true forces the Node 24 runtime
+# but does NOT silence the warning — the runner still inspects each action's
+# manifest. So it is not a fix for the message you are seeing.
+#
+# Before using this file, check the current major version of each action on its
+# repo (github.com/actions/<name>), because these numbers move.
+#
+# SIMPLER ALTERNATIVE — no workflow, no warning:
+#   1. Put index.html in the repository root on your default branch.
+#   2. Repo Settings → Pages → Build and deployment.
+#   3. Source: "Deploy from a branch". Branch: main, folder: / (root). Save.
+#   4. Delete this workflow file.
+# ─────────────────────────────────────────────────────────────────────────────
