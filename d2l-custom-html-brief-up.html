@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D2L Custom HTML — What We Can and Cannot Build</title>
+<style>
+/* ============================================================
+   D2L CUSTOM HTML — STAKEHOLDER BRIEF
+   Tokens are deliberately few and consistent so the whole
+   system can be rebuilt in Figma from this block alone.
+   ============================================================ */
+:root{
+  /* Ink */
+  --ink-900:#080D18; --ink-800:#0F1728; --ink-700:#18223A; --ink-600:#232F4B;
+  --ink-line:rgba(255,255,255,.10);
+  --ink-txt:#C7D0E0; --ink-mut:#8595AF;
+
+  /* Paper */
+  --paper:#FFFFFF; --tint:#F6F7FB; --tint-2:#EEF0F7;
+  --line:#E3E7F0; --line-2:#CFD5E4;
+  --text:#0D1526; --text-2:#4A566E; --text-3:#63708A;
+
+  /* Identity */
+  --crimson:#C8102E; --crimson-lt:#EA5568;
+  --violet:#6D5BF5; --violet-dk:#4436C4; --violet-lt:#A99BFF;
+  --violet-tint:#F0EDFE; --violet-line:#D6CEFC;
+
+  /* Verdict */
+  --yes:#0A7A54;  --yes-bg:#E6F6EF;  --yes-ln:#A9E0C8;
+  --lim:#96600A;  --lim-bg:#FCF3E0;  --lim-ln:#EDD4A3;
+  --no:#C82A22;   --no-bg:#FCEAE8;   --no-ln:#F2C2BD;
+  --val:#4A566E;  --val-bg:#EDEFF5;  --val-ln:#D3D9E6;
+
+  /* Type */
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+
+  /* Space — 4pt */
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;--s9:96px;
+
+  /* Radius */
+  --r-sm:8px; --r-md:14px; --r-lg:20px; --r-pill:999px;
+
+  /* Elevation — layered, this is what stops it reading flat */
+  --e1:0 1px 2px rgba(13,21,38,.05);
+  --e2:0 1px 3px rgba(13,21,38,.06), 0 8px 16px -6px rgba(13,21,38,.09);
+  --e3:0 2px 4px rgba(13,21,38,.05), 0 16px 32px -10px rgba(13,21,38,.13);
+  --e4:0 4px 8px rgba(13,21,38,.06), 0 32px 64px -16px rgba(13,21,38,.20);
+
+  --maxw:1200px; --nav-h:60px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--text);font-family:var(--sans);
+  font-size:17px;line-height:1.62;-webkit-font-smoothing:antialiased}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+img{max-width:100%;display:block}
+a{color:var(--violet-dk)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--violet);outline-offset:3px;border-radius:4px}
+
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 var(--s5)}
+.band{padding:var(--s9) 0}
+.band--tint{background:var(--tint)}
+.band--dark{background:var(--ink-900);color:var(--ink-txt)}
+@media (max-width:760px){.band{padding:var(--s8) 0}.wrap{padding:0 var(--s4)}}
+
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.032em;line-height:1.06}
+.d1{font-size:clamp(40px,6.8vw,76px)}
+.d2{font-size:clamp(30px,4.4vw,52px)}
+.d3{font-size:clamp(21px,2.4vw,28px);letter-spacing:-.024em;line-height:1.2}
+.d4{font-size:19px;letter-spacing:-.016em;line-height:1.28;font-weight:750}
+p{margin:0 0 var(--s4)}p:last-child{margin-bottom:0}
+.lede{font-size:clamp(18px,1.6vw,21px);line-height:1.55;color:var(--text-2)}
+.band--dark .lede{color:var(--ink-txt)}
+.sm{font-size:15px;line-height:1.6}
+.xs{font-size:13.5px;line-height:1.55}
+.mut{color:var(--text-3)}
+.band--dark .mut{color:var(--ink-mut)}
+
+.eyebrow{font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--violet-dk);margin:0 0 var(--s3)}
+.band--dark .eyebrow{color:var(--violet-lt)}
+
+code{font-family:var(--mono);font-size:.86em;background:var(--tint-2);border:1px solid var(--line);
+  border-radius:5px;padding:2px 6px;color:var(--violet-dk);word-break:break-word}
+.band--dark code{background:rgba(255,255,255,.08);border-color:var(--ink-line);color:var(--violet-lt)}
+
+.grid{display:grid;gap:var(--s5)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media (max-width:1020px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:700px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+/* ---------- Masthead ---------- */
+.mast{display:grid;grid-template-columns:1.1fr 1fr}
+.mast__l{background:var(--crimson);color:#fff;padding:var(--s5) var(--s7);display:flex;align-items:center;gap:var(--s4)}
+.mast__glyph{width:44px;height:44px;border:2px solid rgba(255,255,255,.9);border-radius:50%;
+  display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:15px;flex:none}
+.mast__l b{display:block;font-size:13px;letter-spacing:.06em;text-transform:uppercase;line-height:1.4}
+.mast__l span{display:block;font-size:13px;font-weight:400;opacity:.85;letter-spacing:.03em}
+.mast__r{background:linear-gradient(120deg,#EFECFE,#F7F6FF);color:var(--violet-dk);
+  padding:var(--s5) var(--s7);display:flex;align-items:center;
+  font-size:clamp(19px,2.2vw,27px);font-weight:800;letter-spacing:-.026em;line-height:1.15}
+@media (max-width:820px){.mast{grid-template-columns:1fr}.mast__l,.mast__r{padding:var(--s5) var(--s4)}}
+
+/* ---------- Nav ---------- */
+.nav{position:sticky;top:0;z-index:60;height:var(--nav-h);background:rgba(8,13,24,.96);
+  backdrop-filter:saturate(1.5) blur(10px);border-bottom:1px solid var(--ink-line)}
+.nav__in{height:100%;max-width:var(--maxw);margin:0 auto;padding:0 var(--s5);display:flex;align-items:center;gap:var(--s3)}
+.nav__sc{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;flex:1}
+.nav__sc::-webkit-scrollbar{display:none}
+.nav a{flex:none;padding:8px 14px;border-radius:var(--r-pill);text-decoration:none;color:var(--ink-mut);
+  font-size:14px;font-weight:550;white-space:nowrap;transition:background .18s,color .18s}
+.nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.nav a.on{color:#fff;background:var(--violet);box-shadow:0 4px 14px -4px rgba(109,91,245,.7)}
+@media (max-width:760px){.nav__in{padding:0 var(--s4)}}
+
+/* ---------- Section head ---------- */
+.shead{display:flex;align-items:center;gap:var(--s4);margin-bottom:var(--s4)}
+.snum{width:40px;height:40px;border-radius:50%;background:var(--violet);color:#fff;flex:none;
+  display:grid;place-items:center;font-family:var(--mono);font-size:14px;font-weight:700;
+  box-shadow:0 6px 18px -6px rgba(109,91,245,.75)}
+.band--dark .snum{background:var(--violet);box-shadow:0 6px 22px -4px rgba(109,91,245,.85)}
+.shead .eyebrow{margin:0}
+.sintro{max-width:74ch;margin-bottom:var(--s7)}
+.sintro h2{margin-bottom:var(--s4)}
+
+/* ---------- Verdict cards (the scannable fold) ---------- */
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s4)}
+@media (max-width:1020px){.vgrid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:700px){.vgrid{grid-template-columns:1fr}}
+.v{position:relative;background:#fff;border:1px solid var(--line);border-radius:var(--r-md);
+  padding:var(--s5);box-shadow:var(--e2);overflow:hidden;
+  transition:transform .2s ease,box-shadow .2s ease}
+.v:hover{transform:translateY(-3px);box-shadow:var(--e3)}
+.v::before{content:"";position:absolute;top:0;left:0;right:0;height:5px}
+.v--yes::before{background:linear-gradient(90deg,var(--yes),#37B78A)}
+.v--lim::before{background:linear-gradient(90deg,var(--lim),#E0A537)}
+.v--no::before{background:linear-gradient(90deg,var(--no),#E8635A)}
+.v__badge{display:inline-flex;align-items:center;gap:8px;padding:6px 13px 6px 9px;border-radius:var(--r-pill);
+  font-size:13px;font-weight:750;letter-spacing:.01em;margin-bottom:var(--s4);border:1px solid}
+.v__badge svg{width:15px;height:15px;flex:none}
+.v--yes .v__badge{color:var(--yes);background:var(--yes-bg);border-color:var(--yes-ln)}
+.v--lim .v__badge{color:var(--lim);background:var(--lim-bg);border-color:var(--lim-ln)}
+.v--no  .v__badge{color:var(--no); background:var(--no-bg); border-color:var(--no-ln)}
+.v h3{font-size:18px;letter-spacing:-.018em;line-height:1.27;margin-bottom:10px}
+.v p{font-size:14.5px;line-height:1.55;color:var(--text-2);margin:0}
+.v__note{margin-top:var(--s4);padding-top:var(--s3);border-top:1px dashed var(--line-2);
+  font-size:12.5px;color:var(--text-3)}
+
+/* ---------- Split panels ---------- */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:var(--s5)}
+@media (max-width:860px){.split{grid-template-columns:1fr}}
+.panel{border-radius:var(--r-lg);padding:var(--s6);border:1px solid var(--line);background:#fff;box-shadow:var(--e2)}
+.panel--go{background:linear-gradient(170deg,#F3FBF7,#FFFFFF 62%);border-color:var(--yes-ln)}
+.panel--stop{background:linear-gradient(170deg,#FFF6F5,#FFFFFF 62%);border-color:var(--no-ln)}
+.panel--dark{background:linear-gradient(165deg,var(--ink-700),var(--ink-900));border-color:var(--ink-line);
+  color:var(--ink-txt);box-shadow:var(--e4)}
+.panel--dark h3{color:#fff}
+.panel__tag{display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;margin-bottom:var(--s3)}
+.panel--go .panel__tag{color:var(--yes)}
+.panel--stop .panel__tag{color:var(--no)}
+.panel h3{margin-bottom:var(--s4)}
+
+ul.list{list-style:none;margin:0;padding:0}
+ul.list li{position:relative;padding-left:32px;margin-bottom:14px;font-size:15.5px;line-height:1.55;color:var(--text-2)}
+ul.list li:last-child{margin-bottom:0}
+ul.list li b{color:var(--text);font-weight:700}
+ul.list li::before{position:absolute;left:0;top:1px;width:21px;height:21px;border-radius:50%;
+  display:grid;place-items:center;font-size:12px;font-weight:800;line-height:1}
+ul.yes li::before{content:"✓";background:var(--yes-bg);color:var(--yes);border:1px solid var(--yes-ln)}
+ul.no li::before{content:"✕";background:var(--no-bg);color:var(--no);border:1px solid var(--no-ln)}
+ul.caution li::before{content:"!";background:var(--lim-bg);color:var(--lim);border:1px solid var(--lim-ln)}
+.panel--dark ul.list li{color:var(--ink-txt)}
+.panel--dark ul.list li b{color:#fff}
+
+/* ---------- Callout ---------- */
+.call{border-radius:var(--r-md);padding:var(--s5) var(--s6);border:1px solid var(--violet-line);
+  background:linear-gradient(150deg,var(--violet-tint),#FBFAFF);box-shadow:var(--e1)}
+.call b{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--violet-dk);margin-bottom:10px}
+.call p{font-size:16px;color:#241C52;margin:0}
+.call--warn{border-color:var(--lim-ln);background:linear-gradient(150deg,#FDF6E7,#FFFDF8)}
+.call--warn b{color:var(--lim)}.call--warn p{color:#5A3F0C}
+.call--stop{border-color:var(--no-ln);background:linear-gradient(150deg,#FDEEEC,#FFFAFA)}
+.call--stop b{color:var(--no)}.call--stop p{color:#611A15}
+.band--dark .call{background:linear-gradient(150deg,rgba(109,91,245,.20),rgba(109,91,245,.06));
+  border-color:rgba(169,155,255,.35)}
+.band--dark .call b{color:var(--violet-lt)}
+.band--dark .call p{color:#DDE4F0}
+
+/* ---------- Save demo ---------- */
+.demo{border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line);box-shadow:var(--e3);background:#fff}
+.demo__hd{padding:var(--s4) var(--s5);background:var(--tint);border-bottom:1px solid var(--line);
+  font-size:14px;font-weight:700;color:var(--text)}
+.demo__body{display:grid;grid-template-columns:1fr auto 1fr}
+@media (max-width:820px){.demo__body{grid-template-columns:1fr}}
+.demo__col{padding:var(--s5)}
+.demo__col b{display:block;font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--text-3);margin-bottom:var(--s4)}
+.demo__arrow{display:grid;place-items:center;padding:0 var(--s4);background:var(--tint)}
+.demo__arrow span{width:38px;height:38px;border-radius:50%;background:var(--violet);color:#fff;
+  display:grid;place-items:center;font-size:17px;box-shadow:0 6px 18px -6px rgba(109,91,245,.8)}
+@media (max-width:820px){.demo__arrow{padding:var(--s4) 0}.demo__arrow span{transform:rotate(90deg)}}
+.ln{font-family:var(--mono);font-size:13px;line-height:2;display:block;color:var(--text-2)}
+.ln--gone{color:var(--no);text-decoration:line-through;text-decoration-thickness:1.5px;opacity:.72}
+.ln--stay{color:var(--yes)}
+.demo__foot{padding:var(--s4) var(--s5);border-top:1px solid var(--line);background:var(--tint);
+  font-size:14px;color:var(--text-2)}
+
+/* ---------- Limit cards ---------- */
+.limitcard{background:var(--ink-800);border:1px solid var(--ink-line);border-radius:var(--r-md);
+  padding:var(--s6);box-shadow:var(--e4);position:relative;overflow:hidden}
+.limitcard::after{content:"";position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(109,91,245,.24),transparent 70%)}
+.limitcard__n{font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.16em;color:var(--violet-lt);
+  margin-bottom:var(--s3);position:relative;z-index:1}
+.limitcard h3{color:#fff;margin-bottom:var(--s3);position:relative;z-index:1}
+.limitcard p{font-size:15px;color:var(--ink-txt);margin:0;position:relative;z-index:1}
+
+/* ---------- Recommendations ---------- */
+.rec{display:grid;grid-template-columns:64px 1fr;gap:var(--s5);padding:var(--s6) 0;border-top:1px solid var(--line)}
+.rec:first-of-type{border-top:0;padding-top:0}
+.rec__n{width:52px;height:52px;border-radius:var(--r-md);background:linear-gradient(150deg,var(--violet),var(--violet-dk));
+  color:#fff;display:grid;place-items:center;font-size:19px;font-weight:800;box-shadow:0 8px 20px -8px rgba(109,91,245,.85)}
+.rec h3{margin-bottom:10px}
+.rec p{color:var(--text-2);font-size:16px;margin:0}
+.rec__who{display:inline-flex;align-items:center;gap:7px;margin-top:var(--s3);padding:5px 12px;
+  border-radius:var(--r-pill);background:var(--tint-2);border:1px solid var(--line);
+  font-size:12.5px;font-weight:650;color:var(--text-2)}
+@media (max-width:600px){.rec{grid-template-columns:1fr;gap:var(--s3)}}
+
+/* ---------- Sources ---------- */
+.srcs{display:grid;grid-template-columns:repeat(2,1fr);gap:0 var(--s7)}
+@media (max-width:820px){.srcs{grid-template-columns:1fr}}
+.s{display:grid;grid-template-columns:30px 1fr;gap:var(--s3);padding:var(--s4) 0;border-top:1px solid var(--line)}
+.s__n{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--violet-dk);padding-top:3px}
+.s h3{font-size:15px;letter-spacing:-.012em;margin-bottom:3px}
+.s .org{font-size:13px;color:var(--text-3);margin-bottom:5px}
+.s a{font-family:var(--mono);font-size:11.5px;word-break:break-all}
+
+/* ---------- Cover ---------- */
+.cover{position:relative;background:var(--ink-900);color:#fff;padding:var(--s9) 0 var(--s8);overflow:hidden}
+.cover::before{content:"";position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:26px 26px;mask-image:linear-gradient(180deg,#000,transparent 82%)}
+.cover::after{content:"";position:absolute;top:-22%;right:-14%;width:820px;height:820px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(109,91,245,.34),rgba(109,91,245,0) 72%);pointer-events:none}
+.cover__rule{position:absolute;top:0;bottom:0;width:1px;background:var(--crimson);opacity:.62;z-index:1}
+@media (max-width:1320px){.cover__rule{display:none}}
+.cover__in{position:relative;z-index:2}
+.cover__grid{display:grid;grid-template-columns:1.42fr 1fr;gap:var(--s8)}
+@media (max-width:1000px){.cover__grid{grid-template-columns:1fr;gap:var(--s7)}}
+
+.kicker{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;font-weight:600;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--crimson-lt);margin:0 0 var(--s5)}
+.kicker::before{content:"";width:30px;height:2px;background:var(--crimson-lt);flex:none;border-radius:2px}
+@media (max-width:520px){.kicker{font-size:10.5px;letter-spacing:.1em}.kicker::before{width:18px}}
+
+.cover h1{max-width:16ch;margin-bottom:var(--s5)}
+.cover h1 em{font-style:normal;background:linear-gradient(96deg,#A99BFF,#6D5BF5);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.cover__lead{max-width:56ch;color:#B7C2D6;font-size:17px;line-height:1.62}
+.cover__lead strong{color:#fff;font-weight:650}
+
+.covstats{margin-top:var(--s8);display:grid;grid-template-columns:1fr 1fr;gap:var(--s6)}
+@media (max-width:760px){.covstats{grid-template-columns:1fr;gap:var(--s5)}}
+.sgroup__t{font-size:15px;font-weight:750;letter-spacing:-.012em;color:#fff;margin:0 0 var(--s3);
+  padding-bottom:10px;border-bottom:1px solid var(--ink-line)}
+.sgroup__row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+.tile{background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
+  border:1px solid var(--ink-line);border-radius:var(--r-sm);padding:var(--s4);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.tile b{display:block;font-size:34px;font-weight:800;letter-spacing:-.045em;line-height:1;color:#fff}
+.tile span{display:block;margin-top:9px;font-size:12.5px;line-height:1.45;color:var(--ink-mut)}
+.tile--hot{border-color:rgba(169,155,255,.42);background:linear-gradient(180deg,rgba(109,91,245,.24),rgba(109,91,245,.08))}
+.tile--hot b{color:var(--violet-lt)}
+.tile--hot span{color:#C9D1E0}
+
+/* Light legend card on the cover */
+.readcard{background:#fff;border-radius:var(--r-lg);padding:var(--s6);box-shadow:var(--e4);color:var(--text);align-self:start}
+.readcard h2{font-size:19px;letter-spacing:-.018em;margin-bottom:10px}
+.readcard > p{font-size:13.5px;line-height:1.55;color:var(--text-2);margin-bottom:var(--s4)}
+.readcard__row{display:grid;grid-template-columns:118px 1fr;gap:var(--s3);align-items:start;
+  padding:13px 0;border-top:1px solid var(--line)}
+.readcard__row b{display:block;font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:2px}
+.readcard__row span.d{display:block;font-size:12.5px;line-height:1.5;color:var(--text-2)}
+@media (max-width:420px){.readcard__row{grid-template-columns:1fr;gap:6px}}
+
+/* Compact signpost bar under the cover */
+.spbar{background:var(--ink-800);border-top:1px solid var(--ink-line);border-bottom:1px solid var(--ink-line)}
+.spbar__in{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--ink-line)}
+@media (max-width:700px){.spbar__in{grid-template-columns:1fr}}
+.spbar a{display:flex;gap:var(--s4);align-items:center;padding:var(--s5);background:var(--ink-800);
+  text-decoration:none;transition:background .18s}
+.spbar a:hover{background:var(--ink-700)}
+.spbar .ic{width:36px;height:36px;flex:none;border-radius:9px;display:grid;place-items:center;
+  background:rgba(109,91,245,.22);border:1px solid rgba(169,155,255,.4);color:var(--violet-lt);font-size:15px}
+.spbar b{display:block;color:#fff;font-size:15px;font-weight:700;letter-spacing:-.01em}
+.spbar span.d{display:block;color:var(--ink-mut);font-size:13px;line-height:1.45;margin-top:2px}
+
+.divider{height:1px;background:var(--line);border:0;margin:var(--s7) 0}
+.band--dark .divider{background:var(--ink-line)}
+
+/* ---------- Status chips in tables ---------- */
+.st{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;
+  font-size:11.5px;font-weight:700;letter-spacing:.01em;padding:3px 9px;border-radius:var(--r-pill);border:1px solid}
+.st::before{font-size:10px;line-height:1}
+.st-y{color:var(--yes);background:var(--yes-bg);border-color:var(--yes-ln)}
+.st-y::before{content:"✓"}
+.st-p{color:var(--lim);background:var(--lim-bg);border-color:var(--lim-ln)}
+.st-p::before{content:"!"}
+.st-n{color:var(--no);background:var(--no-bg);border-color:var(--no-ln)}
+.st-n::before{content:"✕"}
+.st-v{color:var(--val);background:var(--val-bg);border-color:var(--val-ln)}
+.st-v::before{content:"?"}
+
+/* ---------- Tabs ---------- */
+.tabs{display:flex;gap:6px;padding:5px;background:var(--tint-2);border:1px solid var(--line);
+  border-radius:var(--r-pill);margin-bottom:var(--s5);width:fit-content;max-width:100%;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;border:0;background:transparent;cursor:pointer;font-family:inherit;
+  font-size:14.5px;font-weight:650;color:var(--text-2);padding:9px 18px;border-radius:var(--r-pill);
+  white-space:nowrap;transition:background .18s,color .18s,box-shadow .18s}
+.tabs button:hover{color:var(--text)}
+.tabs button[aria-selected="true"]{background:#fff;color:var(--violet-dk);box-shadow:var(--e1)}
+.tabs button b{font-weight:700;opacity:.55;margin-left:6px;font-size:12.5px}
+
+/* ---------- Reference table ---------- */
+.rtwrap{border:1px solid var(--line);border-radius:var(--r-md);background:#fff;box-shadow:var(--e2);overflow:hidden}
+.rtscroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.rt{width:100%;border-collapse:collapse;font-size:14.5px;min-width:820px}
+.rt caption{caption-side:top;text-align:left;padding:14px 18px;font-size:13.5px;color:var(--text-2);
+  background:var(--tint);border-bottom:1px solid var(--line)}
+.rt thead th{position:sticky;top:calc(var(--nav-h) - 1px);z-index:2;text-align:left;padding:11px 18px;background:var(--ink-800);color:#fff;
+  font-size:11.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+  box-shadow:0 1px 0 rgba(255,255,255,.12)}
+.rt tbody th[scope="row"]{text-align:left;padding:13px 18px;border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:13px;font-weight:600;color:var(--violet-dk);
+  vertical-align:top;white-space:nowrap;background:#FCFCFE}
+.rt tbody td{padding:13px 18px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--text-2);line-height:1.5}
+.rt tbody td:nth-child(2),.rt tbody td:nth-child(3){white-space:nowrap}
+.rt tbody tr:last-child th,.rt tbody tr:last-child td{border-bottom:0}
+.rt tbody tr:hover th[scope="row"]{background:var(--violet-tint)}
+.rt tbody tr:hover td{background:#FAFAFE}
+.rt .note-cell{font-size:13.5px;min-width:280px}
+.hint{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--text-3);margin-top:10px;display:none}
+@media (max-width:920px){.hint{display:block}}
+
+/* Legend */
+.legend{display:flex;flex-wrap:wrap;gap:var(--s4) var(--s5);padding:var(--s4) var(--s5);
+  background:var(--tint);border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:var(--s5)}
+.legend div{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--text-2)}
+
+.foot{background:var(--ink-900);color:var(--ink-mut);padding:var(--s7) 0;border-top:1px solid var(--ink-line)}
+.foot p{font-size:13.5px}
+
+@media print{.nav{display:none}.band{padding:20px 0}.cover,.spbar,.band--dark{background:#fff!important;color:#000!important}}
+</style>
+</head>
+<body>
+
+<header class="mast">
+  <div class="mast__l">
+    <div class="mast__glyph">UX</div>
+    <div><b>University Learning Experience</b><span>UX &amp; Learning Technology Research</span></div>
+  </div>
+  <div class="mast__r">D2L Custom HTML<br>Capability Brief</div>
+</header>
+
+<nav class="nav" aria-label="Sections">
+  <div class="nav__in">
+    <div class="nav__sc" id="navsc">
+      <a href="#answers">The answers</a>
+      <a href="#where">Where it works</a>
+      <a href="#styling">Styling</a>
+      <a href="#interactive">Interactivity</a>
+      <a href="#limits">Hard limits</a>
+      <a href="#do">What we recommend</a>
+      <a href="#reference">Reference tables</a>
+      <a href="#sources">Sources</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ COVER ============ -->
+<section class="cover">
+  <span class="cover__rule" style="left:calc(50% - 660px)" aria-hidden="true"></span>
+  <span class="cover__rule" style="left:calc(50% + 660px)" aria-hidden="true"></span>
+  <div class="wrap cover__in">
+    <div class="cover__grid">
+
+      <div>
+        <p class="kicker">D2L Brightspace · Custom HTML capabilities</p>
+        <h1 class="d1">Two page types<br>keep our design.<br><em>Everywhere else</em><br>strips it.</h1>
+
+        <p class="cover__lead">Brightspace lets us write our own web code inside course pages. On <strong>two specific page types</strong> that gives us near-total control of typography, colour, layout and components.</p>
+        <p class="cover__lead" style="margin-top:var(--s4)">Everywhere else, the platform deletes most of it the moment the page is saved. This brief sets out where that line falls, what it means for the university, and exactly what a developer can rely on.</p>
+
+        <div class="covstats">
+          <div class="sgroup">
+            <h2 class="sgroup__t">Where custom design works</h2>
+            <div class="sgroup__row">
+              <div class="tile"><b>2</b><span>Page types where full design control is possible</span></div>
+              <div class="tile"><b>1</b><span>Administrator setting that unlocks it estate-wide</span></div>
+            </div>
+          </div>
+          <div class="sgroup">
+            <h2 class="sgroup__t">What we take on</h2>
+            <div class="sgroup__row">
+              <div class="tile"><b>0</b><span>Official lists D2L publishes of permitted code</span></div>
+              <div class="tile tile--hot"><b>100%</b><span>Of in-page accessibility that becomes ours</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="readcard">
+        <h2>How to read every status</h2>
+        <p>Every element, property and capability in this brief carries one of four statuses. They describe the evidence we found — not what a browser can do in general.</p>
+        <div class="readcard__row">
+          <span class="st st-y">Supported</span>
+          <div><b>Documented</b><span class="d">Stated by D2L, or used in D2L's own published solutions.</span></div>
+        </div>
+        <div class="readcard__row">
+          <span class="st st-p">Partial</span>
+          <div><b>Works, with a caveat</b><span class="d">Available, but with a limit that changes how you should use it.</span></div>
+        </div>
+        <div class="readcard__row">
+          <span class="st st-n">Not supported</span>
+          <div><b>Removed or inert</b><span class="d">Deleted when the page is saved, or present but with no effect.</span></div>
+        </div>
+        <div class="readcard__row">
+          <span class="st st-v">Validate</span>
+          <div><b>No source found</b><span class="d">D2L publishes nothing either way. Test in our own Brightspace before relying on it.</span></div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+</section>
+
+<div class="spbar">
+  <div class="wrap">
+    <div class="spbar__in">
+      <a href="#answers">
+        <span class="ic" aria-hidden="true">◧</span>
+        <span><b>Reading this to make a decision?</b><span class="d">Sections 1 to 6. Plain language, no code, about seven minutes.</span></span>
+      </a>
+      <a href="#reference">
+        <span class="ic" aria-hidden="true">&lt;/&gt;</span>
+        <span><b>Reading this to build something?</b><span class="d">Section 7 has the full element, CSS and JavaScript tables.</span></span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ THE ANSWERS ============ -->
+<section class="band" id="answers">
+  <div class="wrap">
+    <div class="shead"><div class="snum">01</div><p class="eyebrow">Start here</p></div>
+    <div class="sintro">
+      <h2 class="d2">Nine questions, answered.</h2>
+      <p class="lede">If you read nothing else in this brief, read this. Each answer is one sentence, in plain language, and every one is backed by a source listed at the end.</p>
+    </div>
+
+    <div class="vgrid">
+
+      <article class="v v--yes">
+        <span class="v__badge"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M8 14.4 3.6 10l1.4-1.4 3 3 6-6L15.4 7 8 14.4z"/></svg>Yes</span>
+        <h3>Can we change how course pages look?</h3>
+        <p>On the two page types that keep our styling, we control typography, colour, spacing, imagery and layout completely.</p>
+        <div class="v__note">Source 01</div>
+      </article>
+
+      <article class="v v--yes">
+        <span class="v__badge"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M8 14.4 3.6 10l1.4-1.4 3 3 6-6L15.4 7 8 14.4z"/></svg>Yes</span>
+        <h3>Can we apply university branding to every course at once?</h3>
+        <p>One design file, installed once by an administrator, styles every course page. D2L publishes a free template package built for exactly this.</p>
+        <div class="v__note">Sources 02, 08, 09</div>
+      </article>
+
+      <article class="v v--no">
+        <span class="v__badge"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M14.1 4.5 10 8.6 5.9 4.5 4.5 5.9 8.6 10l-4.1 4.1 1.4 1.4L10 11.4l4.1 4.1 1.4-1.4L11.4 10l4.1-4.1z"/></svg>No</span>
+        <h3>Can we style announcements, assignment briefs and quizzes the same way?</h3>
+        <p>Brightspace strips our design code out of these areas when the page is saved. Only basic text formatting survives.</p>
+        <div class="v__note">Source 01</div>
+      </article>
+
+      <article class="v v--lim">
+        <span class="v__badge"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2 1 17.5h18L10 2zm.9 12.9H9.1v-1.8h1.8v1.8zm0-3.2H9.1V7.5h1.8v4.2z"/></svg>Limited</span>
+        <h3>Can we add interactive elements such as expandable sections?</h3>
+        <p>Yes, but the code has to be installed centrally as a file. It cannot be typed into a page by an author.</p>
+        <div class="v__note">Sources 03, 05</div>
+      </article>
+
+      <article class="v v--no">
+        <span class="v__badge"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M14.1 4.5 10 8.6 5.9 4.5 4.5 5.9 8.6 10l-4.1 4.1 1.4 1.4L10 11.4l4.1 4.1 1.4-1.4L11.4 10l4.1-4.1z"/></svg>No</span>
+        <h3>Can a custom page record a mark or tick off completion?</h3>
+        <p>Nothing we build this way can report a score or track progress. That work has to stay in Quizzes, Assignments or an integrated tool.</p>
+        <div class="v__note">Platform architecture</div>
+      </article>
+
+      <article class="v v--lim">
+        <span class="v__badge"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2 1 17.5h18L10 2zm.9 12.9H9.1v-1.8h1.8v1.8zm0-3.2H9.1V7.5h1.8v4.2z"/></svg>Limited</span>
+        <h3>Will the pages work properly on phones?</h3>
+        <p>Only if we build them that way. Brightspace does not make our content mobile-friendly for us, and the mobile app opens pages in the phone's own browser.</p>
+        <div class="v__note">Source 10</div>
+      </article>
+
+      <article class="v v--lim">
+        <span class="v__badge"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2 1 17.5h18L10 2zm.9 12.9H9.1v-1.8h1.8v1.8zm0-3.2H9.1V7.5h1.8v4.2z"/></svg>Unconfirmed</span>
+        <h3>Can we use the university's own typeface?</h3>
+        <p>D2L does not document this either way. It needs a half-day test in our own Brightspace before we plan around it.</p>
+        <div class="v__note">Source 11 — requires validation</div>
+      </article>
+
+      <article class="v v--no">
+        <span class="v__badge"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M14.1 4.5 10 8.6 5.9 4.5 4.5 5.9 8.6 10l-4.1 4.1 1.4 1.4L10 11.4l4.1 4.1 1.4-1.4L11.4 10l4.1-4.1z"/></svg>No — and shouldn't</span>
+        <h3>Should instructional designers write this code themselves?</h3>
+        <p>Interactive code typed into the editor is deleted anyway. Everything should come from one central, reviewed library that authors simply use.</p>
+        <div class="v__note">Sources 05, 06</div>
+      </article>
+
+      <article class="v v--no">
+        <span class="v__badge"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M14.1 4.5 10 8.6 5.9 4.5 4.5 5.9 8.6 10l-4.1 4.1 1.4 1.4L10 11.4l4.1 4.1 1.4-1.4L11.4 10l4.1-4.1z"/></svg>Ours, not D2L's</span>
+        <h3>Who is responsible if a custom page is not accessible?</h3>
+        <p>We are. Brightspace's built-in checker looks at text and images, but it cannot tell us that a component we built is unusable with a keyboard.</p>
+        <div class="v__note">Source 07</div>
+      </article>
+
+    </div>
+
+    <div class="call" style="margin-top:var(--s7)">
+      <b>The one-line summary</b>
+      <p>Custom HTML is excellent for making course pages clearer and recognisably ours. It is the wrong tool for anything that has to be marked, tracked, or built quickly by an individual author.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHERE IT WORKS ============ -->
+<section class="band band--tint" id="where">
+  <div class="wrap">
+    <div class="shead"><div class="snum">02</div><p class="eyebrow">Where it works</p></div>
+    <div class="sintro">
+      <h2 class="d2">Two page types keep our design.<br>Everywhere else strips it.</h2>
+      <p class="lede">This is the most important technical fact in the brief, and the one that decides everything else. D2L states it plainly in its own documentation.</p>
+    </div>
+
+    <div class="split" style="margin-bottom:var(--s7)">
+      <div class="panel panel--go">
+        <div class="panel__tag">Full design control</div>
+        <h3 class="d3">Where our design survives</h3>
+        <ul class="list yes" style="margin-top:var(--s5)">
+          <li><b>Content pages</b> — the main pages of a course, where learners do most of their reading. This is where the value is.</li>
+          <li><b>Homepage widgets</b> — the panels on a course's front page. The only way to brand what a learner sees first.</li>
+        </ul>
+        <p class="sm mut" style="margin-top:var(--s5)">D2L describes these two as supporting complete web pages. Both accept a shared design file, so a change made centrally appears everywhere.</p>
+      </div>
+
+      <div class="panel panel--stop">
+        <div class="panel__tag">Text formatting only</div>
+        <h3 class="d3">Where it is removed on save</h3>
+        <ul class="list no" style="margin-top:var(--s5)">
+          <li><b>Announcements</b>, <b>assignment briefs</b>, <b>discussion prompts</b>, <b>quiz instructions</b>, <b>module descriptions</b>, <b>rubrics</b> and <b>feedback</b></li>
+          <li><b>The Activity Feed</b>, which does not even offer a code view</li>
+        </ul>
+        <p class="sm mut" style="margin-top:var(--s5)">Authors can still use headings, bold, lists, links, images and tables here. They just cannot carry our visual design into these areas.</p>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="demo__hd">What actually happens when someone presses Save in one of the restricted areas</div>
+      <div class="demo__body">
+        <div class="demo__col">
+          <b>What the author pastes</b>
+          <span class="ln ln--gone">Link to the university design file</span>
+          <span class="ln ln--gone">Page-level styling rules</span>
+          <span class="ln ln--gone">Any interactive code</span>
+          <span class="ln ln--stay">Heading: "Week 3 brief"</span>
+          <span class="ln ln--stay">Paragraph: "Read the case study."</span>
+          <span class="ln ln--stay">A styled box around them</span>
+        </div>
+        <div class="demo__arrow" aria-hidden="true"><span>→</span></div>
+        <div class="demo__col">
+          <b>What Brightspace stores</b>
+          <span class="ln mut">— removed —</span>
+          <span class="ln mut">— removed —</span>
+          <span class="ln mut">— removed —</span>
+          <span class="ln ln--stay">Heading: "Week 3 brief"</span>
+          <span class="ln ln--stay">Paragraph: "Read the case study."</span>
+          <span class="ln ln--stay">An unstyled box</span>
+        </div>
+      </div>
+      <div class="demo__foot">No warning is shown. The page saves successfully and simply looks plain — which is why authors often report that "the code worked but the page looks broken". <span class="mut">Source 01</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STYLING ============ -->
+<section class="band" id="styling">
+  <div class="wrap">
+    <div class="shead"><div class="snum">03</div><p class="eyebrow">Styling — the visual layer</p></div>
+    <div class="sintro">
+      <h2 class="d2">Visual design: mostly a yes.</h2>
+      <p class="lede">On the two page types above, Brightspace does not restrict what we can do visually. The browser does the work, and the browser is a normal browser. The constraints are about <em>where</em> the styling lives, not what it can achieve.</p>
+    </div>
+
+    <div class="split" style="margin-bottom:var(--s6)">
+      <div class="panel">
+        <div class="panel__tag" style="color:var(--yes)">Supported</div>
+        <h3 class="d3">What we can control</h3>
+        <ul class="list yes" style="margin-top:var(--s5)">
+          <li><b>Typography</b> — sizes, weights, line spacing, line length</li>
+          <li><b>Colour</b> — full palette, including accessible contrast pairings</li>
+          <li><b>Spacing and rhythm</b> — consistent margins throughout a page</li>
+          <li><b>Layout</b> — multi-column sections, card grids, hero panels</li>
+          <li><b>Components</b> — cards, callouts, quotes, styled tables, buttons</li>
+          <li><b>Responsive rules</b> — different layouts for phone, tablet and desktop</li>
+          <li><b>Focus and hover states</b> — essential for keyboard accessibility</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel__tag" style="color:var(--lim)">Constraints</div>
+        <h3 class="d3">What limits us</h3>
+        <ul class="list caution" style="margin-top:var(--s5)">
+          <li><b>Styling only survives in two places.</b> Everywhere else it is deleted on save.</li>
+          <li><b>Design files must be installed by an administrator</b> to work across all courses, not by an author in a single course.</li>
+          <li><b>Our page sits inside Brightspace's own layout.</b> We control the content area; we cannot change the menus, headers or app around it.</li>
+          <li><b>Custom typefaces are unproven.</b> Not documented by D2L; needs testing in our system.</li>
+          <li><b>Files moved after courses start using them will break those courses.</b> Where we put the design file matters permanently.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="call">
+      <b>What this means in practice</b>
+      <p>Anything that should look the same in every course — the type scale, the colour palette, the spacing, the card and callout styles — belongs in one file held centrally. Anything an individual author changes should be words, images and links only. If an author has to open a code view to do their job, we have designed the templates badly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INTERACTIVITY ============ -->
+<section class="band band--dark" id="interactive">
+  <div class="wrap">
+    <div class="shead"><div class="snum">04</div><p class="eyebrow">Interactivity — the behaviour layer</p></div>
+    <div class="sintro">
+      <h2 class="d2" style="color:#fff">Interactivity is an IT decision,<br>not an authoring one.</h2>
+      <p class="lede">Two facts from D2L look contradictory and are not. Together they tell us exactly how interactive content has to be delivered here.</p>
+    </div>
+
+    <div class="split" style="margin-bottom:var(--s6)">
+      <div class="panel panel--dark">
+        <div class="panel__tag" style="color:var(--no)">Fact one</div>
+        <h3 class="d3">Interactive code typed into the editor is deleted</h3>
+        <p class="sm" style="color:var(--ink-txt);margin-top:var(--s3)">D2L staff have confirmed on the record that this is deliberate, and done for safety. An author pasting interactive code will simply find it gone after saving, with no error message.</p>
+        <p class="xs mut" style="margin-top:var(--s4)">Sources 05, 06</p>
+      </div>
+      <div class="panel panel--dark">
+        <div class="panel__tag" style="color:var(--yes)">Fact two</div>
+        <h3 class="d3">Interactive code installed as a file does run</h3>
+        <p class="sm" style="color:var(--ink-txt);margin-top:var(--s3)">D2L publishes its own interactive solution for course pages, delivered exactly this way. Its free template package also ships an empty file specifically intended for an institution to add its own interactivity.</p>
+        <p class="xs mut" style="margin-top:var(--s4)">Sources 02, 03</p>
+      </div>
+    </div>
+
+    <div class="call">
+      <b>Why this is actually good news</b>
+      <p>Because interactive code arrives as an installed file rather than typed text, it can be written once, reviewed properly for accessibility and security, and then used by every course. Instructional designers never need to write a line of it, and the institution never has to review several hundred separate versions of the same accordion.</p>
+    </div>
+
+    <hr class="divider">
+
+    <div class="grid g3">
+      <div>
+        <h3 class="d4" style="color:#fff;margin-bottom:10px">Supported</h3>
+        <p class="sm mut">Expandable sections, tabbed panels, steppers and similar patterns — delivered from a central file, on the two page types that allow it.</p>
+      </div>
+      <div>
+        <h3 class="d4" style="color:#fff;margin-bottom:10px">Restricted</h3>
+        <p class="sm mut">Anything typed into an editor. Also anything loaded from an outside website, which needs security review and may be blocked outright.</p>
+      </div>
+      <div>
+        <h3 class="d4" style="color:#fff;margin-bottom:10px">Not supported</h3>
+        <p class="sm mut">Forms and answer boxes. There is nowhere for the answers to go, so a learner's work would be silently thrown away.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HARD LIMITS ============ -->
+<section class="band band--tint" id="limits">
+  <div class="wrap">
+    <div class="shead"><div class="snum">05</div><p class="eyebrow">Hard limits</p></div>
+    <div class="sintro">
+      <h2 class="d2">Four things no amount<br>of code will fix.</h2>
+      <p class="lede">These are not settings we can change or budget we can spend. They are properties of the platform, and any plan has to be built around them.</p>
+    </div>
+
+    <div class="grid g2">
+      <div class="limitcard">
+        <div class="limitcard__n">Limit 01</div>
+        <h3 class="d3">No marks, no tracking, no completion</h3>
+        <p>A custom page cannot report a score, record an attempt or tick a completion box. Anything the university needs data about must live in a Quiz, an Assignment, or an integrated tool.</p>
+      </div>
+      <div class="limitcard">
+        <div class="limitcard__n">Limit 02</div>
+        <h3 class="d3">Accessibility becomes our legal responsibility</h3>
+        <p>D2L is responsible for its own platform. Everything we build inside a page is ours — including whether it works with a keyboard or a screen reader. The built-in checker will not catch these failures.</p>
+      </div>
+      <div class="limitcard">
+        <div class="limitcard__n">Limit 03</div>
+        <h3 class="d3">Ongoing maintenance, not a one-off project</h3>
+        <p>Brightspace updates every month. Our templates need an owner, a test course, and a check after each release. Budgeting this as a project that finishes would be a mistake.</p>
+      </div>
+      <div class="limitcard">
+        <div class="limitcard__n">Limit 04</div>
+        <h3 class="d3">Some answers only exist in our own system</h3>
+        <p>D2L publishes no full list of what code is permitted, and behaviour varies by version, configuration and permissions. A short testing exercise is a prerequisite, not an optional extra.</p>
+      </div>
+    </div>
+
+    <div class="call call--stop" style="margin-top:var(--s7)">
+      <b>The risk if we do nothing</b>
+      <p>Custom code is already available to anyone who can edit a course. Without a central library, individual teams will build their own versions — each with its own look, its own accessibility gaps, and no one responsible when a platform update breaks them. The choice is not whether to allow custom HTML. It is whether it is governed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RECOMMENDATIONS ============ -->
+<section class="band" id="do">
+  <div class="wrap">
+    <div class="shead"><div class="snum">06</div><p class="eyebrow">What we recommend</p></div>
+    <div class="sintro">
+      <h2 class="d2">Five steps, in order.</h2>
+      <p class="lede">The research points to one approach with unusual clarity: build a small, well-governed template library, and make sure authors never have to see the code inside it.</p>
+    </div>
+
+    <div class="rec">
+      <div class="rec__n">1</div>
+      <div>
+        <h3 class="d3">Run a short validation exercise first</h3>
+        <p>Half a day of testing in our own Brightspace converts most of the open questions in this brief into settled facts — including the typeface question. It is a prerequisite for any design work, and it costs almost nothing.</p>
+        <span class="rec__who">Owner: UX + Learning Technology</span>
+      </div>
+    </div>
+
+    <div class="rec">
+      <div class="rec__n">2</div>
+      <div>
+        <h3 class="d3">Start from D2L's free template package, then brand it</h3>
+        <p>D2L publishes a template package that is already accessible, already mobile-friendly, and specifically designed to be customised by an institution. Building from scratch would cost months and give us less support. Several universities have taken exactly this route.</p>
+        <span class="rec__who">Owner: UX + Learning Technology</span>
+      </div>
+    </div>
+
+    <div class="rec">
+      <div class="rec__n">3</div>
+      <div>
+        <h3 class="d3">Install it centrally, at organisation level</h3>
+        <p>One installation, one administrator setting, and every course has access. D2L specifically advises against installing it course by course. This single decision is what turns custom HTML from a local experiment into an institutional capability.</p>
+        <span class="rec__who">Owner: Brightspace administrator</span>
+      </div>
+    </div>
+
+    <div class="rec">
+      <div class="rec__n">4</div>
+      <div>
+        <h3 class="d3">Ship the non-interactive templates first</h3>
+        <p>Page introductions, module headers, learning objectives, resource cards, callouts and summaries need no interactive code at all. They address the real problem — courses being hard to navigate — and carry almost no risk. They can go live while the wider governance conversation continues.</p>
+        <span class="rec__who">Owner: UX + Learning Design</span>
+      </div>
+    </div>
+
+    <div class="rec">
+      <div class="rec__n">5</div>
+      <div>
+        <h3 class="d3">Name an owner and a monthly check</h3>
+        <p>A test course containing every template, checked against each Brightspace release, plus a named team responsible for the library. Without this, the templates degrade quietly and no one notices until a learner complains.</p>
+        <span class="rec__who">Owner: Learning Technology</span>
+      </div>
+    </div>
+
+    <div class="call" style="margin-top:var(--s7)">
+      <b>The decision we are asking for</b>
+      <p>Approval to run the validation exercise, and agreement in principle that custom page design is delivered through one centrally governed template library rather than left to individual courses. Everything else follows from those two decisions.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEVELOPER REFERENCE ============ -->
+<section class="band" id="reference">
+  <div class="wrap">
+    <div class="shead"><div class="snum">07</div><p class="eyebrow">Developer reference</p></div>
+    <div class="sintro">
+      <h2 class="d2">Element, CSS and JavaScript<br>compatibility tables.</h2>
+      <p class="lede">Two status columns, because in Brightspace the answer depends on <em>where</em> the code lives. <strong>Page / Widget</strong> means a Content HTML topic or a Custom Widget, which accept complete web pages. <strong>Editor field</strong> means everywhere else — announcements, assignment briefs, discussion prompts, quiz text, descriptions and feedback.</p>
+    </div>
+
+    <div class="legend">
+      <div><span class="st st-y">Supported</span> Documented by D2L, or used in D2L's own published solutions.</div>
+      <div><span class="st st-p">Partial</span> Works, with a caveat that affects how you should use it.</div>
+      <div><span class="st st-n">Not supported</span> Removed on save, or has no effect.</div>
+      <div><span class="st st-v">Validate</span> No D2L source found. Test in our own tenant before relying on it.</div>
+    </div>
+
+    <div class="call call--warn" style="margin-bottom:var(--s6)">
+      <b>Read this before using the tables</b>
+      <p>D2L does not publish an allow-list of permitted tags, attributes or CSS properties. Only the rows citing a source are documented behaviour; the rest are marked <strong>Validate</strong> rather than guessed at. Behaviour also varies by Brightspace version, configuration and role permissions, so treat this as a test plan as much as a specification.</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Compatibility reference">
+      <button role="tab" id="tab-html" aria-controls="p-html" aria-selected="true">HTML elements <b>31</b></button>
+      <button role="tab" id="tab-css" aria-controls="p-css" aria-selected="false" tabindex="-1">CSS properties <b>32</b></button>
+      <button role="tab" id="tab-js" aria-controls="p-js" aria-selected="false" tabindex="-1">JavaScript <b>13</b></button>
+    </div>
+
+    <!-- ---------- HTML ---------- -->
+    <div role="tabpanel" id="p-html" aria-labelledby="tab-html" tabindex="0">
+      <div class="rtwrap"><div class="rtscroll">
+      <table class="rt">
+        <caption>HTML element compatibility in D2L Brightspace. Source numbers refer to section 08.</caption>
+        <thead><tr><th scope="col">Element</th><th scope="col">Page / Widget</th><th scope="col">Editor field</th><th scope="col">Notes</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">&lt;!DOCTYPE&gt;, &lt;html&gt;, &lt;head&gt;, &lt;body&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Removed</span></td><td class="note-cell">Documented: only the content inside <code>&lt;body&gt;</code> is retained outside the two full-document surfaces. <span class="mut">Source 01</span></td></tr>
+          <tr><th scope="row">&lt;h1&gt;–&lt;h6&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Available from the editor's Format menu. One <code>h1</code> per page; never skip a level.</td></tr>
+          <tr><th scope="row">&lt;p&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Default block element in the editor.</td></tr>
+          <tr><th scope="row">&lt;strong&gt;, &lt;em&gt;, &lt;b&gt;, &lt;i&gt;, &lt;u&gt;, &lt;s&gt;, &lt;sub&gt;, &lt;sup&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">All written by the editor's Inline Formats control. <span class="mut">Source 01</span></td></tr>
+          <tr><th scope="row">&lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Editor has list and indentation controls. Use real lists so counts are announced.</td></tr>
+          <tr><th scope="row">&lt;dl&gt;, &lt;dt&gt;, &lt;dd&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Not exposed in the toolbar, so only reachable via source view.</td></tr>
+          <tr><th scope="row">&lt;a href&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Use Insert Quicklink rather than a pasted URL so links survive course copy. <span class="mut">Source 01</span></td></tr>
+          <tr><th scope="row">&lt;img&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Insert Image and Insert Stuff prompt for alt text; pasted images do not until the accessibility checker runs. <span class="mut">Sources 01, 02</span></td></tr>
+          <tr><th scope="row">&lt;figure&gt;, &lt;figcaption&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Preferred wrapper for captioned images and pull quotes.</td></tr>
+          <tr><th scope="row">&lt;table&gt;, &lt;thead&gt;, &lt;tbody&gt;, &lt;tr&gt;, &lt;th&gt;, &lt;td&gt;, &lt;caption&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">The editor ships advanced table tools including sorting. Always set <code>scope</code> on header cells and include a caption. Never use tables for layout.</td></tr>
+          <tr><th scope="row">&lt;blockquote&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">In the Format menu. Put attribution outside the quote, in a <code>figcaption</code>.</td></tr>
+          <tr><th scope="row">&lt;hr&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Divider is one of the editor's Other Insert Options.</td></tr>
+          <tr><th scope="row">&lt;code&gt;, &lt;pre&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">The editor has a dedicated Insert Code snippet tool with language selection.</td></tr>
+          <tr><th scope="row">&lt;div&gt;, &lt;span&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-p">Unstyled</span></td><td class="note-cell">The elements survive and so do their <code>class</code> attributes — but with no stylesheet to match, the classes do nothing. This is the most common source of "the code saved but the page looks broken".</td></tr>
+          <tr><th scope="row">&lt;section&gt;, &lt;article&gt;, &lt;header&gt;, &lt;footer&gt;, &lt;nav&gt;, &lt;aside&gt;, &lt;main&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Safe in HTML topics. Avoid <code>main</code> and <code>nav</code> inside a content page — Brightspace already provides both around you.</td></tr>
+          <tr><th scope="row">&lt;details&gt;, &lt;summary&gt;</th><td><span class="st st-v">Validate</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">The only disclosure widget that needs no JavaScript, so worth testing first. If it survives, it removes the need for a scripted accordion entirely.</td></tr>
+          <tr><th scope="row">SVG (inline)</th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">No external file, so nothing to strip at the file layer. Decorative SVG needs <code>aria-hidden="true"</code>; meaningful SVG needs <code>role="img"</code> and a <code>&lt;title&gt;</code>.</td></tr>
+          <tr><th scope="row">&lt;iframe&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-p">Partial</span></td><td class="note-cell">Widely used in practice, and Insert Stuff writes embed markup itself. Whether it loads is decided by the remote site's frame policy and the tenant's Content Security Policy. Always set a <code>title</code>. Cross-origin frames cannot auto-size.</td></tr>
+          <tr><th scope="row">&lt;video&gt;, &lt;audio&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Prefer D2L Media Library, which handles captions, transcripts and adaptive playback that raw tags do not. Uncaptioned video is a direct WCAG failure.</td></tr>
+          <tr><th scope="row">&lt;canvas&gt;</th><td><span class="st st-v">Validate</span></td><td><span class="st st-n">No effect</span></td><td class="note-cell">Only meaningful with JavaScript, so relevant on HTML topics alone. Always needs a text alternative.</td></tr>
+          <tr><th scope="row">&lt;button&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-p">Inert</span></td><td class="note-cell">Renders, but without JavaScript it does nothing. Style an <code>&lt;a&gt;</code> instead so the affordance is honest.</td></tr>
+          <tr><th scope="row">&lt;form&gt;, &lt;input&gt;, &lt;textarea&gt;, &lt;select&gt;</th><td><span class="st st-n">No endpoint</span></td><td><span class="st st-n">No endpoint</span></td><td class="note-cell">Elements may render, but nothing receives a submission — learner input is silently discarded. Treat as prohibited. Use Quizzes, Surveys, Self-Assessments or an LTI tool.</td></tr>
+          <tr><th scope="row">&lt;script&gt;</th><td><span class="st st-p">Via file</span></td><td><span class="st st-n">Stripped</span></td><td class="note-cell">D2L staff confirm scripts are deliberately stripped from the editor. D2L's own published solution references script files from an HTML content topic. <span class="mut">Sources 03, 05</span></td></tr>
+          <tr><th scope="row">&lt;style&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Removed</span></td><td class="note-cell">Documented removal outside the two full-document surfaces. <span class="mut">Source 01</span></td></tr>
+          <tr><th scope="row">&lt;link rel="stylesheet"&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Removed</span></td><td class="note-cell">Same rule. Point at a file in Public Files, by one stable path, with no <code>../</code> traversal. <span class="mut">Sources 01, 08</span></td></tr>
+          <tr><th scope="row">&lt;meta&gt;, &lt;title&gt;</th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Removed</span></td><td class="note-cell">Head content only exists where complete documents are supported. <span class="mut">Source 01</span></td></tr>
+          <tr><th scope="row">&lt;object&gt;, &lt;embed&gt;, &lt;applet&gt;</th><td><span class="st st-v">Validate</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Legacy embedding and a common sanitiser target. No modern reason to use them — prefer <code>iframe</code>, LTI or SCORM.</td></tr>
+          <tr><th scope="row">&lt;template&gt;, &lt;slot&gt;, custom elements</th><td><span class="st st-v">Validate</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Brightspace's own interface is built with web components, so custom element name collisions are a genuine risk. Namespace anything you define.</td></tr>
+          <tr><th scope="row">&lt;picture&gt;, &lt;source&gt;, <code>srcset</code></th><td><span class="st st-v">Validate</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Matters for responsive and art-directed imagery. Test before designing an image strategy around it.</td></tr>
+          <tr><th scope="row"><code>data-*</code> attributes</th><td><span class="st st-v">Validate</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Required by the responsive-table stacking pattern and by most scripted components. High priority for the validation exercise.</td></tr>
+          <tr><th scope="row">ARIA attributes (<code>role</code>, <code>aria-*</code>)</th><td><span class="st st-v">Validate</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Every accessible custom component depends on these surviving. Test before building any interactive pattern. Incorrect ARIA is worse than none.</td></tr>
+        </tbody>
+      </table>
+      </div></div>
+      <p class="hint">↔ Scroll table horizontally</p>
+    </div>
+
+    <!-- ---------- CSS ---------- -->
+    <div role="tabpanel" id="p-css" aria-labelledby="tab-css" tabindex="0" hidden>
+      <div class="rtwrap"><div class="rtscroll">
+      <table class="rt">
+        <caption>CSS compatibility in D2L Brightspace. In an HTML topic or widget the browser does the work, so support is essentially browser support; in editor fields the only mechanism is the inline <code>style</code> attribute.</caption>
+        <thead><tr><th scope="col">Property or feature</th><th scope="col">Page / Widget</th><th scope="col">Editor field</th><th scope="col">Notes</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">&lt;link&gt; to an external stylesheet</th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Removed</span></td><td class="note-cell">The whole design system depends on this. Host in Public Files, reference by one stable path. <span class="mut">Sources 01, 02</span></td></tr>
+          <tr><th scope="row">&lt;style&gt; block in the page</th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Removed</span></td><td class="note-cell">Fine for a genuinely one-off page. Becomes copy-paste debt at three pages. <span class="mut">Source 01</span></td></tr>
+          <tr><th scope="row">Inline <code>style=""</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-p">Filtered</span></td><td class="note-cell">The only styling that survives in editor fields — but individual declarations can still be removed. Not all inline CSS is equal. <span class="mut">Source 06</span></td></tr>
+          <tr><th scope="row"><code>color</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">The editor's own colour picker includes a WCAG contrast check. <span class="mut">Source 01</span></td></tr>
+          <tr><th scope="row"><code>background-color</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Check contrast against text at 4.5:1. Do not rely on the platform theme staying the same colour.</td></tr>
+          <tr><th scope="row"><code>font-size</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Use <code>rem</code> in a stylesheet so learner text-size settings are honoured. Inline, <code>px</code> is the safest bet.</td></tr>
+          <tr><th scope="row"><code>font-family</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">The editor exposes a Font menu that writes inline declarations. Web-safe stacks only until self-hosting is proven. <span class="mut">Source 01</span></td></tr>
+          <tr><th scope="row"><code>font-weight</code>, <code>font-style</code>, <code>letter-spacing</code>, <code>line-height</code>, <code>text-transform</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">No documented restriction. Line height of at least 1.5 for body text is a WCAG requirement.</td></tr>
+          <tr><th scope="row"><code>text-align</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Editor has an alignment control. Avoid justified text — it harms readability for dyslexic readers.</td></tr>
+          <tr><th scope="row"><code>padding</code>, <code>margin</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-p">Partial</span></td><td class="note-cell">Shorthand can be normalised on save; longhand is more predictable inline.</td></tr>
+          <tr><th scope="row"><code>width</code>, <code>height</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Fixed pixel widths break the responsive content pane. Never use them in a template.</td></tr>
+          <tr><th scope="row"><code>max-width</code>, <code>max-height</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Set <code>max-width:100%</code> on every image, without exception.</td></tr>
+          <tr><th scope="row"><code>border</code>, <code>border-radius</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-y">Supported</span></td><td class="note-cell">Do not use a border as the only signal for state or meaning.</td></tr>
+          <tr><th scope="row"><code>box-shadow</code>, <code>text-shadow</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Reliable in a stylesheet. Inline behaviour in restricted fields is not documented.</td></tr>
+          <tr><th scope="row"><code>display:flex</code> and flex properties</th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Never use <code>order</code> or <code>row-reverse</code> to change visual sequence — it desynchronises reading order from DOM order.</td></tr>
+          <tr><th scope="row"><code>display:grid</code> and grid properties</th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Preferred for card layouts. <code>repeat(auto-fit, minmax(260px,1fr))</code> is responsive with no media query at all.</td></tr>
+          <tr><th scope="row"><code>gap</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Cleaner than margin-based spacing in grid and flex layouts.</td></tr>
+          <tr><th scope="row"><code>position:relative</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Safe when scoped inside your own container.</td></tr>
+          <tr><th scope="row"><code>position:absolute</code></th><td><span class="st st-p">Partial</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Only inside a positioned parent you own. Absolute layout does not survive reflow at 320px or 400% zoom.</td></tr>
+          <tr><th scope="row"><code>position:fixed</code>, <code>position:sticky</code></th><td><span class="st st-n">Avoid</span></td><td><span class="st st-n">Avoid</span></td><td class="note-cell">Escapes the content pane and collides with Brightspace's own chrome and sticky headers.</td></tr>
+          <tr><th scope="row"><code>z-index</code></th><td><span class="st st-p">Partial</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Competes with the platform's stacking contexts for menus and dialogs. Keep values low and scoped.</td></tr>
+          <tr><th scope="row"><code>overflow</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell"><code>overflow-x:auto</code> is the sanctioned responsive-table fallback. Add <code>tabindex="0"</code> to the scroll container so keyboard users can reach it.</td></tr>
+          <tr><th scope="row">Custom properties (<code>--var</code>)</th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Not possible</span></td><td class="note-cell">Define on a scoped wrapper class, never on <code>:root</code>, so platform and Creator-era variables are not overwritten. <span class="mut">Source 02</span></td></tr>
+          <tr><th scope="row"><code>@media</code> queries</th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Not possible</span></td><td class="note-cell">Cannot be expressed in an inline attribute. This single fact is why responsive design is impossible in editor fields.</td></tr>
+          <tr><th scope="row"><code>@font-face</code></th><td><span class="st st-v">Validate</span></td><td><span class="st st-n">Not possible</span></td><td class="note-cell">Depends on whether font file extensions clear the platform's restricted list, and on origin behaviour between the file host and the page. <span class="mut">Source 11</span></td></tr>
+          <tr><th scope="row"><code>@import</code></th><td><span class="st st-n">Avoid</span></td><td><span class="st st-n">Not possible</span></td><td class="note-cell">Blocks rendering and pulls in an origin that may be blocked by policy. Use a single <code>&lt;link&gt;</code> instead.</td></tr>
+          <tr><th scope="row"><code>:hover</code>, <code>:focus</code>, <code>:focus-visible</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Not possible</span></td><td class="note-cell">A visible focus style is a WCAG requirement, so its absence in editor fields is another reason custom interactive elements do not belong there.</td></tr>
+          <tr><th scope="row"><code>::before</code>, <code>::after</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Not possible</span></td><td class="note-cell">Generated content is not reliably announced by assistive technology. Never put meaning in it.</td></tr>
+          <tr><th scope="row"><code>transition</code>, <code>animation</code>, <code>transform</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Not possible</span></td><td class="note-cell">Must be wrapped in a reduced-motion guard. Nothing may flash more than three times per second.</td></tr>
+          <tr><th scope="row"><code>@media (prefers-reduced-motion)</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-n">Not possible</span></td><td class="note-cell">Mandatory for any motion we ship. Not optional polish.</td></tr>
+          <tr><th scope="row"><code>aspect-ratio</code></th><td><span class="st st-y">Supported</span></td><td><span class="st st-v">Validate</span></td><td class="note-cell">Use on image and iframe containers to prevent layout shift as the page loads.</td></tr>
+          <tr><th scope="row"><code>user-select</code></th><td><span class="st st-v">Validate</span></td><td><span class="st st-n">Stripped</span></td><td class="note-cell">Observed being removed from quiz questions on save. Also an accessibility and usability problem — do not use it to prevent copying. <span class="mut">Source 06</span></td></tr>
+        </tbody>
+      </table>
+      </div></div>
+      <p class="hint">↔ Scroll table horizontally</p>
+    </div>
+
+    <!-- ---------- JS ---------- -->
+    <div role="tabpanel" id="p-js" aria-labelledby="tab-js" tabindex="0" hidden>
+      <div class="rtwrap"><div class="rtscroll">
+      <table class="rt">
+        <caption>JavaScript capability in D2L Brightspace. The governing distinction is not what the code does, but whether it was typed into an editor or installed as a file.</caption>
+        <thead><tr><th scope="col">Capability</th><th scope="col">Status</th><th scope="col">Notes</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">&lt;script&gt; typed into the editor</th><td><span class="st st-n">Stripped</span></td><td class="note-cell">D2L staff state this is deliberate and done for safety. No error is shown — the code simply disappears on save. <span class="mut">Sources 05, 06</span></td></tr>
+          <tr><th scope="row">Inline event handlers (<code>onclick</code>, <code>onload</code>…)</th><td><span class="st st-v">Validate</span></td><td class="note-cell">The classic sanitiser target; assume removed in editor fields. Use <code>addEventListener</code> from a hosted file regardless — inline handlers are unreviewable.</td></tr>
+          <tr><th scope="row">&lt;script src&gt; in a Content HTML topic</th><td><span class="st st-y">Supported</span></td><td class="note-cell">D2L's own published multi-page navigation solution works exactly this way. <span class="mut">Source 03</span></td></tr>
+          <tr><th scope="row">&lt;script src&gt; in a Custom Widget</th><td><span class="st st-p">Admin-governed</span></td><td class="note-cell">Sandboxing wraps the widget in a secure iFrame that stops scripts executing outside it. Un-sandboxed widgets carry a warning icon, and toggling requires a separate Widget Security permission. Build to work sandboxed. <span class="mut">Source 04</span></td></tr>
+          <tr><th scope="row">Scripts hosted in Public Files or Manage Files</th><td><span class="st st-y">Supported</span></td><td class="note-cell">The recommended delivery route. D2L's own template package ships an empty <code>client.min.js</code> for exactly this. Public Files, not course files, so a fix reaches every course. <span class="mut">Source 02</span></td></tr>
+          <tr><th scope="row">Scripts from Brightspace-hosted origins</th><td><span class="st st-y">Supported</span></td><td class="note-cell">D2L references jQuery from <code>s.brightspace.com</code> and its own scripts from Brightspace-relative paths — a strong signal that same-origin is the safe assumption. <span class="mut">Source 03</span></td></tr>
+          <tr><th scope="row">Scripts from a third-party CDN</th><td><span class="st st-v">Validate</span></td><td class="note-cell">Governed by the tenant's Content Security Policy, which D2L does not publish. Policy recommendation: don't. D2L removed its own Bootstrap and jQuery dependencies in template v5. <span class="mut">Source 02</span></td></tr>
+          <tr><th scope="row">DOM manipulation inside your own page</th><td><span class="st st-y">Supported</span></td><td class="note-cell">Scope every query to a container you own. Never use bare <code>document.querySelectorAll</code> across the page.</td></tr>
+          <tr><th scope="row">Manipulating Brightspace's own interface</th><td><span class="st st-n">Avoid</span></td><td class="note-cell">D2L's <code>d2l-nav.js</code> drives the Content tool's Next and Previous buttons — but that is D2L's script on D2L's contract. Brightspace ships monthly; anything built against its internal DOM is a maintenance liability.</td></tr>
+          <tr><th scope="row">Reading or writing grades, scores or completion</th><td><span class="st st-n">Not available</span></td><td class="note-cell">There is no API from a content page. Use Quizzes, Assignments, SCORM or an LTI tool.</td></tr>
+          <tr><th scope="row"><code>fetch</code> / <code>XMLHttpRequest</code> to external services</th><td><span class="st st-v">Validate</span></td><td class="note-cell">CSP and privacy review both apply. Any external call from a course page sends identifiable learner traffic to a third party.</td></tr>
+          <tr><th scope="row"><code>localStorage</code>, <code>sessionStorage</code>, cookies</th><td><span class="st st-v">Validate</span></td><td class="note-cell">Not documented. Never store anything that identifies a learner or records their answers.</td></tr>
+          <tr><th scope="row">Web components / <code>customElements.define</code></th><td><span class="st st-v">Validate</span></td><td class="note-cell">Brightspace's interface is itself built with web components, so an unnamespaced custom element could collide with a platform one.</td></tr>
+        </tbody>
+      </table>
+      </div></div>
+      <p class="hint">↔ Scroll table horizontally</p>
+    </div>
+
+    <div class="call" style="margin-top:var(--s6)">
+      <b>How to use this as a test plan</b>
+      <p>Build one page containing every row marked <strong>Validate</strong>, save it into an HTML content topic, an assignment brief, a quiz question and a custom widget, then reopen the source and compare. That single exercise converts around twenty unknowns into settled facts, and the result becomes our own internal specification — the one D2L does not publish.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOURCES ============ -->
+<section class="band band--tint" id="sources">
+  <div class="wrap">
+    <div class="shead"><div class="snum">08</div><p class="eyebrow">Sources</p></div>
+    <div class="sintro">
+      <h2 class="d2">Twelve sources.</h2>
+      <p class="lede">Official D2L documentation first, then D2L Community posts where they contain a statement from D2L staff. All accessed 6 August 2026. Brightspace behaviour varies by version, configuration and permissions, so anything marked in this brief as unconfirmed needs checking in our own environment.</p>
+    </div>
+
+    <div class="srcs">
+      <div>
+        <div class="s"><div class="s__n">01</div><div>
+          <h3>About Brightspace Editor</h3>
+          <div class="org">D2L Corporation — Brightspace Community, article 3652</div>
+          <a href="https://community.d2l.com/brightspace/kb/articles/3652-about-brightspace-editor" target="_blank" rel="noopener">community.d2l.com/brightspace/kb/articles/3652-about-brightspace-editor</a>
+        </div></div>
+        <div class="s"><div class="s__n">02</div><div>
+          <h3>HTML Templates (Version 5.0)</h3>
+          <div class="org">D2L Corporation — Brightspace Community, article 26484</div>
+          <a href="https://community.d2l.com/brightspace/kb/articles/26484-html-templates-version-5-0" target="_blank" rel="noopener">community.d2l.com/brightspace/kb/articles/26484-html-templates-version-5-0</a>
+        </div></div>
+        <div class="s"><div class="s__n">03</div><div>
+          <h3>Improve navigation in multi-page content topics</h3>
+          <div class="org">D2L Corporation — Brightspace Community, article 3365</div>
+          <a href="https://community.d2l.com/brightspace/kb/articles/3365-improve-navigation-in-multi-page-content-topics" target="_blank" rel="noopener">community.d2l.com/brightspace/kb/articles/3365-improve-navigation-in-multi-page-content-topics</a>
+        </div></div>
+        <div class="s"><div class="s__n">04</div><div>
+          <h3>Create a custom widget</h3>
+          <div class="org">D2L instructor documentation, via an institutional mirror — confirm against the current D2L article</div>
+          <a href="https://class.daytonastate.edu/shared/Documentation/Help/Instructor/le/widgets/instructor/create_custom_widget.htm" target="_blank" rel="noopener">class.daytonastate.edu/.../create_custom_widget.htm</a>
+        </div></div>
+        <div class="s"><div class="s__n">05</div><div>
+          <h3>Script isn't executed in Brightspace LMS</h3>
+          <div class="org">D2L Brightspace Community discussion 2659 — contains a D2L staff response</div>
+          <a href="https://community.d2l.com/brightspace/discussion/2659/script-isnt-executed-in-brightspace-lms" target="_blank" rel="noopener">community.d2l.com/brightspace/discussion/2659</a>
+        </div></div>
+        <div class="s"><div class="s__n">06</div><div>
+          <h3>Brightspace editor strips out some CSS</h3>
+          <div class="org">D2L Brightspace Community discussion 3974 — contains a D2L staff response</div>
+          <a href="https://community.d2l.com/brightspace/discussion/3974/brightspace-wysiwyg-editor-strips-out-some-css" target="_blank" rel="noopener">community.d2l.com/brightspace/discussion/3974</a>
+        </div></div>
+      </div>
+      <div>
+        <div class="s"><div class="s__n">07</div><div>
+          <h3>Compliance to accessibility standards in HTML-authored content</h3>
+          <div class="org">D2L Corporation — Brightspace Community, article 3659</div>
+          <a href="https://community.d2l.com/brightspace/kb/articles/3659-compliance-to-accessibility-standards-in-html-authored-content" target="_blank" rel="noopener">community.d2l.com/brightspace/kb/articles/3659-compliance-to-accessibility-standards</a>
+        </div></div>
+        <div class="s"><div class="s__n">08</div><div>
+          <h3>Content authoring — change template version default for all courses</h3>
+          <div class="org">D2L Brightspace Community discussion 5812 — the template location setting</div>
+          <a href="https://community.d2l.com/brightspace/discussion/5812/content-authoring-change-template-version-default-for-all-courses" target="_blank" rel="noopener">community.d2l.com/brightspace/discussion/5812</a>
+        </div></div>
+        <div class="s"><div class="s__n">09</div><div>
+          <h3>Using HTML with CSS templates to create consistency in D2L content</h3>
+          <div class="org">D2L Worldwide Connection conference presentation — the setting that enables templates</div>
+          <a href="https://www.slideshare.net/slideshow/using-html-with-css-templates-to-create-consistency-in-d2l-content/217873697" target="_blank" rel="noopener">slideshare.net/slideshow/using-html-with-css-templates-in-d2l-content</a>
+        </div></div>
+        <div class="s"><div class="s__n">10</div><div>
+          <h3>Brightspace Pulse doesn't show HTML pages anymore</h3>
+          <div class="org">D2L Brightspace Community discussion 2172 — contains a D2L staff response on mobile behaviour</div>
+          <a href="https://community.d2l.com/brightspace/discussion/2172/brightspace-pulse-doesnt-show-html-pages-anymore-since-last-update" target="_blank" rel="noopener">community.d2l.com/brightspace/discussion/2172</a>
+        </div></div>
+        <div class="s"><div class="s__n">11</div><div>
+          <h3>Restricted File Extensions</h3>
+          <div class="org">D2L Corporation — Brightspace Community, article 2867</div>
+          <a href="https://community.d2l.com/brightspace/kb/articles/2867-restricted-file-extensions" target="_blank" rel="noopener">community.d2l.com/brightspace/kb/articles/2867-restricted-file-extensions</a>
+        </div></div>
+        <div class="s"><div class="s__n">12</div><div>
+          <h3>Create a Content topic in Manage Files</h3>
+          <div class="org">D2L Corporation — Brightspace Community, article 3670</div>
+          <a href="https://community.d2l.com/brightspace/kb/articles/3670-create-a-content-topic-in-manage-files" target="_blank" rel="noopener">community.d2l.com/brightspace/kb/articles/3670-create-a-content-topic-in-manage-files</a>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Prepared by the UX and Learning Technology research team. Based on review of D2L's published documentation, not on testing in our own environment — see recommendation 1. D2L, Brightspace and Pulse are trademarks of D2L Corporation. This brief is internal research and is not affiliated with or endorsed by D2L. Compiled 6 August 2026.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var links = [].slice.call(document.querySelectorAll('.nav a'));
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  var sc = document.getElementById('navsc');
+  var cur = null;
+  function set(id){
+    if(id===cur) return; cur=id;
+    links.forEach(function(a){
+      var on = a.getAttribute('href')==='#'+id;
+      a.classList.toggle('on', on);
+      if(on){
+        a.setAttribute('aria-current','true');
+        var l=a.offsetLeft, r=l+a.offsetWidth;
+        if(l<sc.scrollLeft || r>sc.scrollLeft+sc.clientWidth){
+          sc.scrollTo({left:Math.max(0,l-20), behavior:'smooth'});
+        }
+      } else { a.removeAttribute('aria-current'); }
+    });
+  }
+  function pick(){
+    var best=null, bd=Infinity;
+    secs.forEach(function(s){
+      var t=s.getBoundingClientRect().top-90;
+      if(t<=0 && Math.abs(t)<bd){ bd=Math.abs(t); best=s.id; }
+    });
+    if(best) set(best);
+  }
+  window.addEventListener('scroll', pick, {passive:true});
+  window.addEventListener('resize', pick, {passive:true});
+  pick();
+
+  /* ---- Reference tabs ---- */
+  var tablist = document.querySelector('.tabs[role="tablist"]');
+  if (tablist){
+    var tabs = [].slice.call(tablist.querySelectorAll('[role="tab"]'));
+    function select(tab, focus){
+      tabs.forEach(function(t){
+        var on = t === tab;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+      });
+      if (focus) tab.focus();
+    }
+    tabs.forEach(function(t, i){
+      t.addEventListener('click', function(){ select(t); });
+      t.addEventListener('keydown', function(e){
+        var k = e.key, n = null;
+        if (k === 'ArrowRight') n = tabs[(i + 1) % tabs.length];
+        else if (k === 'ArrowLeft') n = tabs[(i - 1 + tabs.length) % tabs.length];
+        else if (k === 'Home') n = tabs[0];
+        else if (k === 'End') n = tabs[tabs.length - 1];
+        if (n){ e.preventDefault(); select(n, true); }
+      });
+    });
+  }
+
+  /* ---- Make wide tables keyboard-scrollable ---- */
+  [].forEach.call(document.querySelectorAll('.rtscroll'), function(el){
+    var t = el.querySelector('table');
+    var cap = t && t.querySelector('caption');
+    el.setAttribute('tabindex','0');
+    el.setAttribute('role','region');
+    el.setAttribute('aria-label', cap ? cap.textContent.trim().slice(0,70) : 'Scrollable table');
+  });
+})();
+</script>
+</body>
+</html>
